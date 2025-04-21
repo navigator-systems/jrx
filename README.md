@@ -12,7 +12,6 @@
         ├── bin/
         ├── doc/
         ├── lib/
-        ├── src/
         ├── main.go
         ├── Makefile
         └── Dockerfile
