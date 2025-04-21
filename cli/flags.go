@@ -7,7 +7,7 @@ import (
 var flagOSV = &cli.BoolFlag{
 	Name:        "osv",
 	Aliases:     []string{"o"},
-	Usage:       "CHeck if the packages have known vulnerabilities",
+	Usage:       "Check if the packages have known vulnerabilities",
 	Destination: &osvFlag,
 }
 
