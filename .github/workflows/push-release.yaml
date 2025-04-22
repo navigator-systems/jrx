@@ -25,8 +25,8 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            bin/go-chaos-freebsd-amd64
-            bin/go-chaos-linux-amd64
-            bin/go-chaos-linux-arm64
-            bin/go-chaos-darwin-amd64
-            bin/go-chaos-darwin-m1
+            bin/jrx-freebsd-amd64
+            bin/jrx-linux-amd64
+            bin/jrx-linux-arm64
+            bin/jrx-darwin-amd64
+            bin/jrx-darwin-m1
