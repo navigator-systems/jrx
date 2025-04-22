@@ -9,6 +9,7 @@ import (
 var osvFlag bool
 var archFlag string
 var osFlag string
+var ciFlag string
 
 var newCmd = &cli.Command{
 	Name:    "new",
@@ -70,5 +71,18 @@ var cleanCmd = &cli.Command{
 		name := c.Args().Get(0)
 		cmd.CleanCmd(name)
 		return nil
+	},
+}
+
+var ciCmd = &cli.Command{
+	Name:  "ci",
+	Usage: "add a CI template (Jenkins, GitHub Actions or Gitlab Template) to the project",
+	Action: func(c *cli.Context) error {
+		name := c.Args().Get(0)
+		cmd.AddCICmd(name, ciFlag)
+		return nil
+	},
+	Flags: []cli.Flag{
+		templateCI,
 	},
 }

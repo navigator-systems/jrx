@@ -22,3 +22,9 @@ var flagOS = &cli.StringFlag{
 	Usage:       "Operating system to build for",
 	Destination: &osFlag,
 }
+
+var templateCI = &cli.StringFlag{
+	Name:        "template",
+	Usage:       "template for CI",
+	Destination: &ciFlag,
+}

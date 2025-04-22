@@ -17,6 +17,7 @@ func InitCli() {
 			cleanCmd,
 			modCmd,
 			infoCmd,
+			ciCmd,
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
