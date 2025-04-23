@@ -26,6 +26,8 @@
    - Dependencies listed in `go.sum`.
    - Known vulnerabilities using the [OSV.dev](https://osv.dev) CVE database.
 
+- 🛠️ `jrx ci --template <jenkins, github> <project>`  — Creates either a Jenkinsfile or a simple gituhub workflow yaml file for building the application. 
+   
 ---
 
 ## 🛡️ Vulnerability Scanning
@@ -44,10 +46,11 @@ USAGE:
    jrx [global options] command [command options]
 
 COMMANDS:
-   info, i   get information from the project
+   info, i   Get information from the project
    new, n    Create a new project
-   build, b  build and compile a project
-   mod, m    start a simple go.mod file
+   build, b  Build and compile a project
+   mod, m    Start a simple go.mod file
+   ci        Add a CI template (Jenkins, GitHub Actions or Gitlab Template) to the project
    help, h   Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
