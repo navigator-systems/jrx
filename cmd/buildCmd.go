@@ -66,7 +66,7 @@ func BuildCmd(path, goarch, goos string) error {
 	if ops.CheckIfCfgExists(absPath) {
 		buildProjectConfig(absPath)
 	} else {
-		buildProjectNoConfig(absPath, goos, goarch)
+		buildGoCmd(absPath, "", goos, goarch)
 	}
 
 	fmt.Println("Build completed successfully")
@@ -85,18 +85,6 @@ func buildProjectConfig(absPath string) error {
 		}
 	} else {
 		fmt.Println("No builds found in config")
-	}
-
-	return nil
-}
-
-func buildProjectNoConfig(outputName, goos, goarch string) error {
-
-	// Prepare the command
-	err := buildGoCmd(outputName, "", goos, goarch)
-	if err != nil {
-		fmt.Printf("Build failed: %v\n", err)
-		return err
 	}
 
 	return nil
