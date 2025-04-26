@@ -21,14 +21,15 @@ type Build struct {
 	Flags string `toml:"flags"`
 }
 
-func ReadCfgFile(path string) Config {
+func ReadCfgFile(path string) (Config, error) {
 	var jrxConfig Config
 	cfgFile := filepath.Join(path, "jrx.toml")
 	_, err := toml.DecodeFile(cfgFile, &jrxConfig)
 	if err != nil {
 		fmt.Println("Error reading config file:", err)
+		return jrxConfig, err
 	}
-	return jrxConfig
+	return jrxConfig, nil
 }
 
 func CheckIfCfgExists(path string) bool {

@@ -74,7 +74,10 @@ func BuildCmd(path, goarch, goos string) error {
 }
 
 func buildProjectConfig(absPath string) error {
-	jrxConfig := ops.ReadCfgFile(absPath)
+	jrxConfig, err := ops.ReadCfgFile(absPath)
+	if err != nil {
+		return err
+	}
 	if len(jrxConfig.Builds) > 0 {
 		for _, build := range jrxConfig.Builds {
 			buildGoCmd(absPath, build.Flags, build.OS, build.Arch)
