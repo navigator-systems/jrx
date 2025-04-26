@@ -1,0 +1,15 @@
+name = "{{.ProjectName}}"
+version = "0.0.1"
+authors = [
+    "Author Name",
+]
+
+[builds.release] 
+    arch = "amd64"
+    os = "linux"
+
+
+[builds.dev] 
+    arch = "arm64"
+    os = "linux"
+    
