@@ -115,4 +115,9 @@ func NewCmd(name string) {
 		os.Exit(1)
 	}
 
+	err = createFilesFromTemplate(name, ".", "jrx.toml")
+	if err != nil {
+		os.Exit(1)
+	}
+
 }
