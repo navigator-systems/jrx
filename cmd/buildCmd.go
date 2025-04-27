@@ -24,9 +24,9 @@ func ModCmd(path string) error {
 		fmt.Printf("Failed to resolve absolute path: %v\n", err)
 		return err
 	}
-
+	projectName := filepath.Base(absPath)
 	// Prepare the command
-	cmd := exec.Command("go", "mod", "init", path)
+	cmd := exec.Command("go", "mod", "init", projectName)
 	cmd.Dir = absPath
 
 	// Capture stdout and stderr
@@ -39,7 +39,15 @@ func ModCmd(path string) error {
 		return err
 	}
 
-	fmt.Println("Mod completed successfully")
+	tidy := exec.Command("go", "mod", "tidy")
+	tidy.Dir = absPath
+	var tidyStderr bytes.Buffer
+	tidy.Stderr = &tidyStderr
+	if err := tidy.Run(); err != nil {
+		fmt.Println(tidyStderr.String())
+		return err
+	}
+
 	return nil
 }
 

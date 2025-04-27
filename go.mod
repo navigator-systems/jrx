@@ -3,8 +3,8 @@ module jrx
 go 1.22.6
 
 require (
-	github.com/BurntSushi/toml v1.4.0
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/BurntSushi/toml v1.5.0
+	github.com/urfave/cli/v2 v2.27.6
 )
 
 require (

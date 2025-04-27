@@ -14,6 +14,7 @@
         ├── lib/
         ├── main.go
         ├── Makefile
+        ├── jrx.toml
         └── Dockerfile
     ```
 - 📦 `jrx mod <project>` — Equivalent to `go mod init`.
@@ -27,8 +28,40 @@
    - Known vulnerabilities using the [OSV.dev](https://osv.dev) CVE database.
 
 - 🛠️ `jrx ci --template <jenkins, github> <project>`  — Creates either a Jenkinsfile or a simple gituhub workflow yaml file for building the application. 
-   
 ---
+## jrx file
+With every new project `jrx` will create a config file called `jrx.toml`, here you can write relevant information about the project. 
+Standard jrx.toml file looks like this: 
+
+```
+name = "MyProject"
+version = "0.0.1"
+authors = [
+    "My Name",
+    
+]
+
+[builds.laptop] 
+   arch = "386"
+   os = "linux"
+
+[builds.raspPi] 
+   arch = "arm64"
+   os = "linux"
+
+[builds.release]
+   arch = "amd64"
+   os = "linux"
+   flags = "-ldflags= -s -w"
+    
+```
+The keys `name`, `version`, `authors` are descriptions of the project, users can update these values according to the needs of the project. Users can now 
+define multiple custom build targets directly in jrx.toml, specifying architecture, operating system, and build flags under `[builds.<target>]` sections. 
+
+This makes it easy to cross-compile for different environments like Linux, Windows, Raspberry Pi, or even older platforms — all from a single command `jrx build MyProject`.
+
+The output binaries will be created in the bin directory with the following name sctructure `projectName-OS-ARCH`. If several build targetss use the same OS and ARCH these are going to get overwritten. 
+
 
 ## 🛡️ Vulnerability Scanning
 
