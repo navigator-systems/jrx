@@ -74,7 +74,7 @@ func BuildCmd(path, goarch, goos string) error {
 	if ops.CheckIfCfgExists(absPath) {
 		buildProjectConfig(absPath)
 	} else {
-		buildGoCmd(absPath, "", goos, goarch)
+		buildGoCmd(absPath, "", goos, goarch, "")
 	}
 
 	fmt.Println("Build completed successfully")
@@ -86,9 +86,10 @@ func buildProjectConfig(absPath string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(jrxConfig.Builds)
 	if len(jrxConfig.Builds) > 0 {
-		for _, build := range jrxConfig.Builds {
-			buildGoCmd(absPath, build.Flags, build.OS, build.Arch)
+		for key, build := range jrxConfig.Builds {
+			buildGoCmd(absPath, build.Flags, build.OS, build.Arch, key)
 
 		}
 	} else {
@@ -98,18 +99,28 @@ func buildProjectConfig(absPath string) error {
 	return nil
 }
 
-func buildGoCmd(absPath, flags, goos, goarch string) error {
+func buildGoCmd(absPath, flags, goos, goarch, jrxBuildName string) error {
 
 	// Get project name from path
 	projectName := filepath.Base(absPath)
 	outputName := projectName
 
+	// If Build name is specified, customize the output name
+	if jrxBuildName != "" {
+		outputName = outputName + fmt.Sprintf("-%s", jrxBuildName)
+	}
+
 	// If GOOS or GOARCH are specified, customize the output name
-	if goos != "" || goarch != "" {
-		outputName = fmt.Sprintf("%s-%s-%s", projectName, goos, goarch)
-		if goos == "windows" {
-			outputName += ".exe"
-		}
+
+	if goos != "" {
+		outputName = outputName + fmt.Sprintf("-%s", goos)
+	}
+
+	if goarch != "" {
+		outputName = outputName + fmt.Sprintf("-%s", goarch)
+	}
+	if goos == "windows" {
+		outputName += ".exe"
 	}
 
 	filebin := filepath.Join(absPath, "bin")

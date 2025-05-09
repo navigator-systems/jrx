@@ -7,6 +7,8 @@ authors = [
 [builds.release] 
     arch = "amd64"
     os = "linux"
+    flags = "-ldflags= -s -w"
+
 
 
 [builds.dev] 

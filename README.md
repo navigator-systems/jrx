@@ -60,9 +60,8 @@ define multiple custom build targets directly in jrx.toml, specifying architectu
 
 This makes it easy to cross-compile for different environments like Linux, Windows, Raspberry Pi, or even older platforms — all from a single command `jrx build MyProject`.
 
-The output binaries will be created in the bin directory with the following name sctructure `projectName-OS-ARCH`. 
+The output binaries will be created in the bin directory with the following name sctructure `projectName-targetName-OS-ARCH`. 
 
-***Note: If several build targets use the same OS and ARCH these are going to get overwritten.***
 
 
 ## 🛡️ Vulnerability Scanning

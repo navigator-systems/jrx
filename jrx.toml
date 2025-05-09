@@ -4,10 +4,6 @@ authors = [
     "Ramon Esparza <mental12345>",
 ]
 
-[builds.laptop] 
-   arch = "386"
-   os = "linux"
-
 [builds.raspPi] 
    arch = "arm64"
    os = "linux"
@@ -16,3 +12,7 @@ authors = [
    arch = "amd64"
    os = "linux"
    flags = "-ldflags= -s -w"
+
+[builds.dev]
+   arch = "amd64"
+   os = "linux"
