@@ -1,15 +1,17 @@
 package cli
 
 import (
-	"jrx/cmd"
+	"github.com/navigator-systems/jrx/cmd"
 
 	"github.com/urfave/cli/v2"
 )
 
-var osvFlag bool
-var archFlag string
-var osFlag string
-var ciFlag string
+var (
+	osvFlag  bool
+	archFlag string
+	osFlag   string
+	ciFlag   string
+)
 
 var newCmd = &cli.Command{
 	Name:    "new",

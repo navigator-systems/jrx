@@ -1,10 +1,9 @@
 package main
 
 import (
-	"jrx/cli"
+	"github.com/navigator-systems/jrx/cli"
 )
 
 func main() {
-
 	cli.InitCli()
 }

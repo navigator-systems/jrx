@@ -3,10 +3,11 @@ package cmd
 import (
 	"embed"
 	"fmt"
-	"jrx/ops"
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/navigator-systems/jrx/ops"
 )
 
 //go:embed templates/*
@@ -19,7 +20,6 @@ const (
 )
 
 func createFilesFromTemplate(name, path, templateFile string) error {
-
 	mainPath := filepath.Join(name, path, templateFile)
 	templateFilePath := filepath.Join("templates", templateFile)
 	tmplBytes, err := templates.ReadFile(templateFilePath)
@@ -48,17 +48,16 @@ func createFilesFromTemplate(name, path, templateFile string) error {
 	}
 
 	tmpl.Execute(file, context)
-	//tmpl.Execute(file, struct{ ProjectName string }{ProjectName: name})
+	// tmpl.Execute(file, struct{ ProjectName string }{ProjectName: name})
 
 	return nil
-
 }
 
 func createTree(name string) error {
 	fmt.Println("Creating project tree...")
 	directories := []string{bin, lib, doc}
 	for _, dir := range directories {
-		err := os.MkdirAll(name+"/"+dir, 0755)
+		err := os.MkdirAll(name+"/"+dir, 0o755)
 		if err != nil {
 			fmt.Printf("Error creating directory '%s': %v\n", dir, err)
 			return err
@@ -70,7 +69,7 @@ func createTree(name string) error {
 
 func createDirectory(name string) error {
 	fmt.Println("Creating directory...", name)
-	err := os.Mkdir(name, 0755)
+	err := os.Mkdir(name, 0o755)
 	if err != nil {
 		if os.IsExist(err) {
 			fmt.Printf("Error: Directory '%s' already exists\n", name)
@@ -80,7 +79,6 @@ func createDirectory(name string) error {
 		return err
 	}
 	return nil
-
 }
 
 func NewCmd(name string) {
@@ -119,5 +117,4 @@ func NewCmd(name string) {
 	if err != nil {
 		os.Exit(1)
 	}
-
 }
