@@ -1,4 +1,4 @@
-module jrx
+module github.com/navigator-systems/jrx
 
 go 1.22.6
 

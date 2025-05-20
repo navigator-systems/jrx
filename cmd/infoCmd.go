@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"jrx/ops"
+
+	"github.com/navigator-systems/jrx/ops"
 )
 
 func InfoCmd(path string, osv bool) {
@@ -12,5 +13,4 @@ func InfoCmd(path string, osv bool) {
 		fmt.Println("Checking for vulnerabilities...")
 		ops.CheckVulnerabilities(x)
 	}
-
 }

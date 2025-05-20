@@ -3,15 +3,15 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"jrx/ops"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/navigator-systems/jrx/ops"
 )
 
 func ModCmd(path string) error {
-
 	if path == "" {
 		fmt.Println("Please provide a project name")
 		return nil
@@ -90,7 +90,6 @@ func buildProjectConfig(absPath string) error {
 	if len(jrxConfig.Builds) > 0 {
 		for key, build := range jrxConfig.Builds {
 			buildGoCmd(absPath, build.Flags, build.OS, build.Arch, key)
-
 		}
 	} else {
 		fmt.Println("No builds found in config")
@@ -100,7 +99,6 @@ func buildProjectConfig(absPath string) error {
 }
 
 func buildGoCmd(absPath, flags, goos, goarch, jrxBuildName string) error {
-
 	// Get project name from path
 	projectName := filepath.Base(absPath)
 	outputName := projectName
