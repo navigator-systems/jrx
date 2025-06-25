@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/navigator-systems/jrx/cmd"
+	"github.com/navigator-systems/jrx/server"
 
 	"github.com/urfave/cli/v2"
 )
@@ -86,5 +87,15 @@ var ciCmd = &cli.Command{
 	},
 	Flags: []cli.Flag{
 		templateCI,
+	},
+}
+
+var serverCmd = &cli.Command{
+	Name:    "server",
+	Aliases: []string{"s"},
+	Usage:   "Start a simple web server",
+	Action: func(c *cli.Context) error {
+		server.StartServer()
+		return nil
 	},
 }

@@ -1,0 +1,4 @@
+port = "8080"
+template_repo = "https://github.com/mental12345/templatesProjects.git"
+template_branch = "main"
+template_file = "templates.toml"
