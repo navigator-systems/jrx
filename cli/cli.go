@@ -18,7 +18,6 @@ func InitCli() {
 			modCmd,
 			infoCmd,
 			ciCmd,
-			serverCmd,
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
