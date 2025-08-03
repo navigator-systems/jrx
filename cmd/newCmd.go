@@ -4,10 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/navigator-systems/jrx/patterns"
 )
+
+var TemplateFuncs = template.FuncMap{
+	"index":     patterns.Index,
+	"join":      strings.Join,
+	"toLower":   strings.ToLower,
+	"toUpper":   strings.ToUpper,
+	"hasPrefix": strings.HasPrefix,
+	"hasSuffix": strings.HasSuffix,
+}
 
 func NewCmd(ProjectName, templateName string) {
 	if ProjectName == "" || templateName == "" {
@@ -56,7 +66,8 @@ func NewCmd(ProjectName, templateName string) {
 			return err
 		}
 
-		tmpl, err := template.ParseFiles(path)
+		tmpl, err := template.New(info.Name()).Funcs(TemplateFuncs).ParseFiles(path)
+		//tmpl, err := template.ParseFiles(path)
 		if err != nil {
 			return fmt.Errorf("error parsing template file %s: %v", path, err)
 		}
