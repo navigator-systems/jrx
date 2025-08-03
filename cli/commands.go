@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/navigator-systems/jrx/cmd"
+	"github.com/navigator-systems/jrx/patterns"
 
 	"github.com/urfave/cli/v2"
 )
@@ -10,7 +11,6 @@ var (
 	osvFlag  bool
 	archFlag string
 	osFlag   string
-	ciFlag   string
 )
 
 var newCmd = &cli.Command{
@@ -19,7 +19,8 @@ var newCmd = &cli.Command{
 	Usage:   "Create a new project",
 	Action: func(c *cli.Context) error {
 		name := c.Args().Get(0)
-		cmd.NewCmd(name)
+		template := c.Args().Get(1)
+		cmd.NewCmd(name, template)
 		return nil
 	},
 }
@@ -36,17 +37,6 @@ var buildCmd = &cli.Command{
 	Flags: []cli.Flag{
 		flagArch,
 		flagOS,
-	},
-}
-
-var modCmd = &cli.Command{
-	Name:    "mod",
-	Aliases: []string{"m"},
-	Usage:   "Start a simple go.mod file",
-	Action: func(c *cli.Context) error {
-		name := c.Args().Get(0)
-		cmd.ModCmd(name)
-		return nil
 	},
 }
 
@@ -76,15 +66,12 @@ var cleanCmd = &cli.Command{
 	},
 }
 
-var ciCmd = &cli.Command{
-	Name:  "ci",
-	Usage: "add a CI template (Jenkins, GitHub Actions or Gitlab Template) to the project",
+var templatesCmd = &cli.Command{
+	Name:  "download-templates",
+	Usage: "Download the templates for a new project",
 	Action: func(c *cli.Context) error {
-		name := c.Args().Get(0)
-		cmd.AddCICmd(name, ciFlag)
+
+		patterns.InitTemplates()
 		return nil
-	},
-	Flags: []cli.Flag{
-		templateCI,
 	},
 }

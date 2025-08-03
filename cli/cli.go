@@ -12,12 +12,12 @@ func InitCli() {
 		Name:  "jrx",
 		Usage: "Just a simple go wrapper CLI",
 		Commands: []*cli.Command{
+
 			newCmd,
 			buildCmd,
 			cleanCmd,
-			modCmd,
 			infoCmd,
-			ciCmd,
+			templatesCmd,
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
