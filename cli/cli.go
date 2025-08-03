@@ -10,7 +10,7 @@ import (
 func InitCli() {
 	app := &cli.App{
 		Name:  "jrx",
-		Usage: "Just a simple go wrapper CLI",
+		Usage: "Just a simple project management CLI",
 		Commands: []*cli.Command{
 
 			newCmd,
