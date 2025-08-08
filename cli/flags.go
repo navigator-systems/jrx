@@ -11,6 +11,12 @@ var flagOSV = &cli.BoolFlag{
 	Destination: &osvFlag,
 }
 
+var flagGitOrg = &cli.StringFlag{
+	Name:        "repository",
+	Usage:       "Git repository to operate on",
+	Destination: &gitOrg,
+}
+
 var flagArch = &cli.StringFlag{
 	Name:        "arch",
 	Usage:       "Architecture to build for",
@@ -21,10 +27,4 @@ var flagOS = &cli.StringFlag{
 	Name:        "os",
 	Usage:       "Operating system to build for",
 	Destination: &osFlag,
-}
-
-var templateCI = &cli.StringFlag{
-	Name:        "template",
-	Usage:       "template for CI",
-	Destination: &ciFlag,
 }

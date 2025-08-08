@@ -17,8 +17,6 @@ func ModCmd(path string) error {
 		return nil
 	}
 
-	fmt.Println("Performing go mod")
-
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		fmt.Printf("Failed to resolve absolute path: %v\n", err)
