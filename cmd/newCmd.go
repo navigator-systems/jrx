@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/navigator-systems/jrx/giteng"
 	"github.com/navigator-systems/jrx/patterns"
 )
 
@@ -19,7 +20,7 @@ var TemplateFuncs = template.FuncMap{
 	"hasSuffix": strings.HasSuffix,
 }
 
-func NewCmd(ProjectName, templateName string) {
+func NewCmd(ProjectName, templateName, gitOrg string) {
 	if ProjectName == "" || templateName == "" {
 		fmt.Println("Please provide a name for the project and a template name")
 		return
@@ -47,6 +48,9 @@ func NewCmd(ProjectName, templateName string) {
 		fmt.Printf("Project '%s' directory already exists\n", ProjectName)
 		return
 	}
+
+	giteng.GitInit(ProjectName)
+	giteng.GitBranchMain(ProjectName)
 
 	err = filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -90,6 +94,8 @@ func NewCmd(ProjectName, templateName string) {
 		fmt.Printf("Error copying template files: %v\n", err)
 		return
 	}
+
+	giteng.GitAddCommmit(ProjectName)
 
 	fmt.Printf("Creating new project '%s' with template '%s'\n", ProjectName, templateName)
 

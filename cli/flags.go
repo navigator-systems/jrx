@@ -11,6 +11,12 @@ var flagOSV = &cli.BoolFlag{
 	Destination: &osvFlag,
 }
 
+var flagGitOrg = &cli.StringFlag{
+	Name:        "repository",
+	Usage:       "Git repository to operate on",
+	Destination: &gitOrg,
+}
+
 var flagArch = &cli.StringFlag{
 	Name:        "arch",
 	Usage:       "Architecture to build for",

@@ -12,11 +12,7 @@ func InitCli() {
 		Name:  "jrx",
 		Usage: "Just a simple project management CLI",
 		Commands: []*cli.Command{
-
-			newCmd,
-			buildCmd,
-			cleanCmd,
-			infoCmd,
+			projectCmd,
 			templatesCmd,
 		},
 	}
