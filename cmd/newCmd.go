@@ -49,9 +49,6 @@ func NewCmd(ProjectName, templateName, gitOrg string) {
 		return
 	}
 
-	giteng.GitInit(ProjectName)
-	giteng.GitBranchMain(ProjectName)
-
 	err = filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -95,6 +92,8 @@ func NewCmd(ProjectName, templateName, gitOrg string) {
 		return
 	}
 
+	giteng.GitInit(ProjectName)
+	giteng.GitBranchMain(ProjectName)
 	giteng.GitAddCommmit(ProjectName)
 
 	fmt.Printf("Creating new project '%s' with template '%s'\n", ProjectName, templateName)
