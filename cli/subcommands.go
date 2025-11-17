@@ -24,23 +24,6 @@ var newCmd = &cli.Command{
 	},
 }
 
-
-var infoCmd = &cli.Command{
-	Name:    "info",
-	Aliases: []string{"i"},
-
-	Usage: "Get information from the project",
-	Action: func(c *cli.Context) error {
-		name := c.Args().Get(0)
-		cmd.InfoCmd(name, osvFlag)
-		return nil
-	},
-	Flags: []cli.Flag{
-		flagOSV,
-	},
-}
-
-
 // Templates SubCommands
 var tmplInfoCmd = &cli.Command{
 	Name: "list",
