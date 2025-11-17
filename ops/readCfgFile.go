@@ -9,10 +9,18 @@ import (
 )
 
 type Config struct {
-	ProjectName string           `toml:"name"`
-	Version     string           `toml:"version,omitempty"`
-	Authors     []string         `toml:"authors,omitempty"`
-	Builds      map[string]Build `toml:"builds,omitempty"`
+	ProjectName string           	`toml:"name"`
+	Version     string           	`toml:"version,omitempty"`
+	Authors     []string         	`toml:"authors,omitempty"`
+	Team		string			 	`toml:"team,omitempty"`
+	Builds      map[string]Build 	`toml:"builds,omitempty"`
+	Packages    map[string]Package  `toml:"packages,omitempty"`
+}
+
+type Package struct {
+	
+	Type	   string `toml: "type,,omitempty"`
+	Command    string `toml:"command,omitempty"`
 }
 
 type Build struct {

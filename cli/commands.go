@@ -17,8 +17,6 @@ var projectCmd = &cli.Command{
 	Usage:   "Manage projects",
 	Subcommands: []*cli.Command{
 		newCmd,
-		buildCmd,
-		cleanCmd,
 		infoCmd,
 	},
 }

@@ -12,7 +12,10 @@ import (
 )
 
 var TemplateFuncs = template.FuncMap{
-	"index":     patterns.Index,
+	"index": patterns.Index,
+	"getVariable": func(key string, rt *patterns.RootTemplate) string {
+		return rt.GetVariable(key)
+	},
 	"join":      strings.Join,
 	"toLower":   strings.ToLower,
 	"toUpper":   strings.ToUpper,
@@ -79,7 +82,7 @@ func NewCmd(ProjectName, templateName, gitOrg string) {
 		}
 		defer dstFile.Close()
 
-		if err := tmpl.Execute(dstFile, project); err != nil {
+		if err := tmpl.Execute(dstFile, &project); err != nil {
 			return fmt.Errorf("error executing template for %s: %v", relPath, err)
 		}
 
@@ -95,7 +98,5 @@ func NewCmd(ProjectName, templateName, gitOrg string) {
 	giteng.GitInit(ProjectName)
 	giteng.GitBranchMain(ProjectName)
 	giteng.GitAddCommmit(ProjectName)
-
-	fmt.Printf("Creating new project '%s' with template '%s'\n", ProjectName, templateName)
 
 }

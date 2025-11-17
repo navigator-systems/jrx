@@ -7,6 +7,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// project SubCommands
+
 var newCmd = &cli.Command{
 	Name:    "new",
 	Aliases: []string{"n"},
@@ -22,20 +24,6 @@ var newCmd = &cli.Command{
 	},
 }
 
-var buildCmd = &cli.Command{
-	Name:    "build",
-	Aliases: []string{"b"},
-	Usage:   "Build and compile a project",
-	Action: func(c *cli.Context) error {
-		name := c.Args().Get(0)
-		cmd.BuildCmd(name, archFlag, osFlag)
-		return nil
-	},
-	Flags: []cli.Flag{
-		flagArch,
-		flagOS,
-	},
-}
 
 var infoCmd = &cli.Command{
 	Name:    "info",
@@ -52,17 +40,8 @@ var infoCmd = &cli.Command{
 	},
 }
 
-var cleanCmd = &cli.Command{
-	Name:    "clean",
-	Aliases: []string{"c"},
-	Usage:   "Clean the project binaries",
-	Action: func(c *cli.Context) error {
-		name := c.Args().Get(0)
-		cmd.CleanCmd(name)
-		return nil
-	},
-}
 
+// Templates SubCommands
 var tmplInfoCmd = &cli.Command{
 	Name: "list",
 
