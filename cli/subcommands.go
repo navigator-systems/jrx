@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/navigator-systems/jrx/cmd"
-	"github.com/navigator-systems/jrx/patterns"
+	"github.com/navigator-systems/jrx/internal/templates"
 
 	"github.com/urfave/cli/v2"
 )
@@ -40,7 +40,7 @@ var tmplDownloadCmd = &cli.Command{
 	Usage: "Download the templates for a new project",
 	Action: func(c *cli.Context) error {
 
-		patterns.InitTemplates()
+		templates.InitTemplates()
 		return nil
 	},
 }

@@ -1,4 +1,4 @@
-package giteng
+package scm
 
 import (
 	"fmt"

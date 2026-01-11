@@ -1,4 +1,4 @@
-package patterns
+package templates
 
 func Index(slice []string, item int) string {
 	if item >= 0 && item < len(slice) {
