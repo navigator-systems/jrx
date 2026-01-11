@@ -1,4 +1,4 @@
-package ops
+package config
 
 import (
 	"fmt"
@@ -8,19 +8,18 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type Config struct {
-	ProjectName string           	`toml:"name"`
-	Version     string           	`toml:"version,omitempty"`
-	Authors     []string         	`toml:"authors,omitempty"`
-	Team		string			 	`toml:"team,omitempty"`
-	Builds      map[string]Build 	`toml:"builds,omitempty"`
-	Packages    map[string]Package  `toml:"packages,omitempty"`
+type Cfg struct {
+	ProjectName string             `toml:"name"`
+	Version     string             `toml:"version,omitempty"`
+	Authors     []string           `toml:"authors,omitempty"`
+	Team        string             `toml:"team,omitempty"`
+	Builds      map[string]Build   `toml:"builds,omitempty"`
+	Packages    map[string]Package `toml:"packages,omitempty"`
 }
 
 type Package struct {
-	
-	Type	   string `toml: "type,,omitempty"`
-	Command    string `toml:"command,omitempty"`
+	Type    string `toml:"type,omitempty"`
+	Command string `toml:"command,omitempty"`
 }
 
 type Build struct {
@@ -29,8 +28,8 @@ type Build struct {
 	Flags string `toml:"flags"`
 }
 
-func ReadCfgFile(path string) (Config, error) {
-	var jrxConfig Config
+func ReadCfgFile(path string) (Cfg, error) {
+	var jrxConfig Cfg
 	cfgFile := filepath.Join(path, "jrx.toml")
 	_, err := toml.DecodeFile(cfgFile, &jrxConfig)
 	if err != nil {

@@ -3,19 +3,42 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/navigator-systems/jrx/patterns"
+	"github.com/navigator-systems/jrx/internal/config"
+	"github.com/navigator-systems/jrx/internal/templates"
 )
 
 func TmplInfoCmd() {
-	jrxGit, err := patterns.GetTemplateCtrl()
+	// Load JRX configuration
+	jrxConfig, err := config.ReadJRXConfig()
 	if err != nil {
-		fmt.Println("Error getting templates:", err)
+		fmt.Printf("Error reading JRX config: %v\n", err)
 		return
 	}
-	fmt.Println("Available templates:")
-	for name, tmpl := range jrxGit.Templates {
-		fmt.Printf("Name: %s, Path: %s, Description: %s\n", name, tmpl.Path, tmpl.Description)
-	}
-	fmt.Println("Use 'jrx new <project_name> <template_name>' to create a new project from a template.")
 
+	// Create template manager
+	tm := templates.NewTemplateManager(jrxConfig)
+
+	// Load templates
+	if err := tm.LoadTemplates(); err != nil {
+		fmt.Printf("Error loading templates: %v\n", err)
+		return
+	}
+
+	// List all templates
+	tmplList, err := tm.ListAll()
+	if err != nil {
+		fmt.Printf("Error listing templates: %v\n", err)
+		return
+	}
+
+	fmt.Println("Available templates:")
+	for _, tmpl := range tmplList {
+		fmt.Printf("\nName: %s\n", tmpl.Name)
+		fmt.Printf("  Path: %s\n", tmpl.Path)
+		fmt.Printf("  Description: %s\n", tmpl.Description)
+		if len(tmpl.Tags) > 0 {
+			fmt.Printf("  Tags: %v\n", tmpl.Tags)
+		}
+	}
+	fmt.Println("\nUse 'jrx project new <project_name> <template_name>' to create a new project from a template.")
 }

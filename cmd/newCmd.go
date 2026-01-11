@@ -2,101 +2,64 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"text/template"
+	"log"
 
-	"github.com/navigator-systems/jrx/giteng"
-	"github.com/navigator-systems/jrx/patterns"
+	"github.com/navigator-systems/jrx/internal/config"
+	"github.com/navigator-systems/jrx/internal/errors"
+	"github.com/navigator-systems/jrx/internal/generator"
+	"github.com/navigator-systems/jrx/internal/templates"
 )
 
-var TemplateFuncs = template.FuncMap{
-	"index": patterns.Index,
-	"getVariable": func(key string, rt *patterns.RootTemplate) string {
-		return rt.GetVariable(key)
-	},
-	"join":      strings.Join,
-	"toLower":   strings.ToLower,
-	"toUpper":   strings.ToUpper,
-	"hasPrefix": strings.HasPrefix,
-	"hasSuffix": strings.HasSuffix,
-}
-
-func NewCmd(ProjectName, templateName, gitOrg string) {
-	if ProjectName == "" || templateName == "" {
-		fmt.Println("Please provide a name for the project and a template name")
+func NewCmd(projectName, templateName, gitOrg string) {
+	// Validate input
+	if projectName == "" {
+		fmt.Println("Error:", errors.ErrEmptyProjectName)
 		return
 	}
-	jrxGit, err := patterns.GetTemplateCtrl()
+	if templateName == "" {
+		fmt.Println("Error:", errors.ErrEmptyTemplateName)
+		return
+	}
+
+	// Load JRX configuration
+	jrxConfig, err := config.ReadJRXConfig()
 	if err != nil {
-		fmt.Println("Error getting templates:", err)
-		return
-	}
-	if _, ok := jrxGit.Templates[templateName]; !ok {
-		fmt.Printf("Template '%s' not found\n", templateName)
+		fmt.Printf("Error reading JRX config: %v\n", err)
 		return
 	}
 
-	project := jrxGit.Templates[templateName]
-	project.Name = ProjectName
+	// Create template manager
+	tm := templates.NewTemplateManager(jrxConfig)
 
-	templatePath := project.Path
-	templatePath = "jrxTemplates/" + templatePath
-	if _, err := os.Stat(templatePath); err != nil {
-		fmt.Println("Template path does not exist")
-		return
-	}
-	if _, err := os.Stat(ProjectName); err == nil {
-		fmt.Printf("Project '%s' directory already exists\n", ProjectName)
+	// Load templates
+	if err := tm.LoadTemplates(); err != nil {
+		fmt.Printf("Error loading templates: %v\n", err)
 		return
 	}
 
-	err = filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-		//Get the relative path to maintain directory structure
-		relPath, err := filepath.Rel(templatePath, path)
-		if err != nil {
-			return err
-		}
-		//Create the destination path
-		destPath := filepath.Join(ProjectName, relPath)
-		if err := os.MkdirAll(filepath.Dir(destPath), os.ModePerm); err != nil {
-			return err
-		}
-
-		tmpl, err := template.New(info.Name()).Funcs(TemplateFuncs).ParseFiles(path)
-		//tmpl, err := template.ParseFiles(path)
-		if err != nil {
-			return fmt.Errorf("error parsing template file %s: %v", path, err)
-		}
-
-		dstFile, err := os.Create(destPath)
-		if err != nil {
-			return err
-		}
-		defer dstFile.Close()
-
-		if err := tmpl.Execute(dstFile, &project); err != nil {
-			return fmt.Errorf("error executing template for %s: %v", relPath, err)
-		}
-
-		fmt.Println("Rendered:", relPath)
-		return nil
-	})
-
+	// Get the specific template
+	tmpl, err := tm.GetTemplate(templateName)
 	if err != nil {
-		fmt.Printf("Error copying template files: %v\n", err)
+		if err.Error() == "get template: template not found" {
+			fmt.Printf("Template '%s' not found\n", templateName)
+			return
+		}
+		fmt.Printf("Error getting template: %v\n", err)
 		return
 	}
 
-	giteng.GitInit(ProjectName)
-	giteng.GitBranchMain(ProjectName)
-	giteng.GitAddCommmit(ProjectName)
+	// Create project generator
+	pg := generator.NewProjectGenerator(tmpl, projectName, tm.GetTemplatesDir(), tm.GetFuncMap())
+	if gitOrg != "" {
+		pg.SetGitOrg(gitOrg)
+	}
 
+	// Generate the project
+	if err := pg.Generate(); err != nil {
+		fmt.Printf("Error generating project: %v\n", err)
+		return
+	}
+
+	fmt.Printf("✓ Project '%s' created successfully from template '%s'\n", projectName, templateName)
+	log.Printf("Project directory: %s\n", pg.GetOutputDir())
 }
