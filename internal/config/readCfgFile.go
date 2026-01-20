@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
@@ -13,19 +12,12 @@ type Cfg struct {
 	Version     string             `toml:"version,omitempty"`
 	Authors     []string           `toml:"authors,omitempty"`
 	Team        string             `toml:"team,omitempty"`
-	Builds      map[string]Build   `toml:"builds,omitempty"`
 	Packages    map[string]Package `toml:"packages,omitempty"`
 }
 
 type Package struct {
 	Type    string `toml:"type,omitempty"`
 	Command string `toml:"command,omitempty"`
-}
-
-type Build struct {
-	Arch  string `toml:"arch"`
-	OS    string `toml:"os"`
-	Flags string `toml:"flags"`
 }
 
 func ReadCfgFile(path string) (Cfg, error) {
@@ -37,11 +29,4 @@ func ReadCfgFile(path string) (Cfg, error) {
 		return jrxConfig, err
 	}
 	return jrxConfig, nil
-}
-
-func CheckIfCfgExists(path string) bool {
-	cfgFile := filepath.Join(path, "jrx.toml")
-
-	_, err := os.Stat(cfgFile)
-	return !os.IsNotExist(err)
 }

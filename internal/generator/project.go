@@ -22,6 +22,11 @@ type ProjectGenerator struct {
 	funcMap      template.FuncMap
 }
 
+var skipFiles = []string{
+	"project.toml",
+	"vars.toml",
+}
+
 // NewProjectGenerator creates a new ProjectGenerator instance
 func NewProjectGenerator(tmpl *templates.RootTemplate, projectName string, templatesDir string, funcMap template.FuncMap) *ProjectGenerator {
 	return &ProjectGenerator{
@@ -103,6 +108,14 @@ func (pg *ProjectGenerator) copyFiles() error {
 		// Skip directories
 		if info.IsDir() {
 			return nil
+		}
+
+		//Skip template files
+		for _, skipFile := range skipFiles {
+			if info.Name() == skipFile {
+				log.Println("Skipping template file:", skipFile)
+				return nil
+			}
 		}
 
 		// Get the relative path to maintain directory structure
