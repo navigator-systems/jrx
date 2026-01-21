@@ -146,18 +146,23 @@ func (tm *TemplateManager) loadProjectConfig(templateKey, filePath string, tpl *
 // loadVarsConfig loads and decodes vars.toml into the template's Variables
 func (tm *TemplateManager) loadVarsConfig(templateKey, filePath string, tpl *RootTemplate) error {
 	var varsConfig struct {
-		Templates map[string]struct {
-			Variables []VariablesTemplate `toml:"variables"`
-		} `toml:"templates"`
+		Variable map[string]struct {
+			Default     string `toml:"default"`
+			Description string `toml:"description"`
+		} `toml:"variable"`
 	}
 
 	if _, err := toml.DecodeFile(filePath, &varsConfig); err != nil {
 		return fmt.Errorf("error decoding vars.toml: %w", err)
 	}
 
-	// Extract variables for the specific template
-	if templateVars, exists := varsConfig.Templates[templateKey]; exists {
-		tpl.Variables = templateVars.Variables
+	tpl.Variables = make([]VariablesTemplate, 0, len(varsConfig.Variable))
+	for key, varInfo := range varsConfig.Variable {
+		tpl.Variables = append(tpl.Variables, VariablesTemplate{
+			Key:         key,
+			Description: varInfo.Description,
+			Default:     varInfo.Default,
+		})
 	}
 
 	return nil
