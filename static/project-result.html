@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 600px; 
+            width: 100%;
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            text-align: center;
+        }
+        .header {
+            background: {{if .Success}}linear-gradient(135deg, #11998e 0%, #38ef7d 100%){{else}}linear-gradient(135deg, #eb3349 0%, #f45c43 100%){{end}};
+            color: white;
+            padding: 40px;
+        }
+        .header h1 { 
+            font-size: 3em; 
+            margin-bottom: 10px; 
+        }
+        .header p { 
+            font-size: 1.5em; 
+        }
+        .content { 
+            padding: 40px; 
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .info-item {
+            margin: 10px 0;
+            color: #495057;
+        }
+        .info-item strong {
+            color: #212529;
+            display: inline-block;
+            min-width: 120px;
+        }
+        .variables-box {
+            background: #e7f1ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .variables-box h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .variable-item {
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #495057;
+        }
+        .btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{if .Success}}✅{{else}}❌{{end}}</h1>
+            <p>{{.Message}}</p>
+        </div>
+
+        <div class="content">
+            {{if .Success}}
+                <div class="info-box">
+                    <div class="info-item">
+                        <strong>Project Name:</strong> {{.ProjectName}}
+                    </div>
+                    <div class="info-item">
+                        <strong>Template:</strong> {{.TemplateName}}
+                    </div>
+                    {{if .Variables}}
+                    <div class="variables-box">
+                        <h3>Variables Used:</h3>
+                        {{range $key, $value := .Variables}}
+                        <div class="variable-item">{{$key}} = {{$value}}</div>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+
+                <p style="color: #6c757d; margin: 20px 0;">
+                    This is a preview. In the future, this project will be automatically created in GitHub or GitLab.
+                </p>
+            {{end}}
+
+            <div>
+                <a href="/new-project" class="btn">🔄 Create Another</a>
+                <a href="/templates" class="btn">📚 View Templates</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

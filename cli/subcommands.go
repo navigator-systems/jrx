@@ -46,3 +46,18 @@ var tmplDownloadCmd = &cli.Command{
 		return nil
 	},
 }
+
+// Server Command
+var serverCmd = &cli.Command{
+	Name:    "server",
+	Aliases: []string{"s", "serve"},
+	Usage:   "Start the JRX web server",
+	Action: func(c *cli.Context) error {
+		port := c.String("port")
+		cmd.ServerCmd(port)
+		return nil
+	},
+	Flags: []cli.Flag{
+		flagPort,
+	},
+}

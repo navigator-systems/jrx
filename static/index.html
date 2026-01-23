@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JRX - Project Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 900px; 
+            width: 100%;
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #444140 0%, #dad4d3 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        .logo {
+            margin-bottom: 30px;
+        }
+        .logo img {
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+        .header h1 { 
+            font-size: 3em; 
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .header p { 
+            font-size: 1.3em; 
+            opacity: 0.95;
+        }
+        .content { 
+            padding: 50px 40px; 
+        }
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+        .welcome-text h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #e74c3c;
+        }
+        .welcome-text p {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        .action-card {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            border: 2px solid #bdc3c7;
+            border-radius: 12px;
+            padding: 35px 25px;
+            text-align: center;
+            text-decoration: none;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+        .action-card:hover::before {
+            opacity: 1;
+        }
+        .action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(231, 76, 60, 0.4);
+            border-color: #e74c3c;
+        }
+        .action-card-content {
+            position: relative;
+            z-index: 1;
+        }
+        .action-card:hover .action-card-content {
+            color: white;
+        }
+        .action-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .action-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 12px;
+        }
+        .action-card p {
+            font-size: 1em;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        .footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 25px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .footer a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="/images/jrx_no_bg.png" alt="JRX Logo">
+            </div>
+            <p>Just a simple project management system</p>
+        </div>
+
+        <div class="content">
+            <div class="welcome-text">
+                <h3>Welcome to JRX</h3>
+                <p>
+                    Streamline your project creation workflow with powerful templates 
+                    and automated setup. 
+                </p>
+            </div>
+
+            <div class="actions-grid">
+                <a href="/templates" class="action-card">
+                    <div class="action-card-content">
+                        <span class="action-icon">📚</span>
+                        <h3>Browse Templates</h3>
+                        <p>Explore available project templates, download new ones, and view detailed information about each template.</p>
+                    </div>
+                </a>
+
+                <a href="/new-project" class="action-card">
+                    <div class="action-card-content">
+                        <span class="action-icon">✨</span>
+                        <h3>Create Project</h3>
+                        <p>Generate a new project from a template with custom variables and configurations.</p>
+                    </div>
+                </a>
+
+                <a href="/api/templates" class="action-card">
+                    <div class="action-card-content">
+                        <span class="action-icon">🔌</span>
+                        <h3>API Access</h3>
+                        <p>Access templates programmatically via our JSON API for integration with your tools.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 JRX - Navigator Systems | <a href="https://github.com/navigator-systems/jrx">View on GitHub</a></p>
+        </div>
+    </div>
+</body>
+</html>
