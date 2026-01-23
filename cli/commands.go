@@ -5,10 +5,8 @@ import (
 )
 
 var (
-	osvFlag  bool
-	archFlag string
-	osFlag   string
 	gitOrg   string
+	varsFlag string
 )
 
 var projectCmd = &cli.Command{

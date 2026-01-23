@@ -4,27 +4,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var flagOSV = &cli.BoolFlag{
-	Name:        "osv",
-	Aliases:     []string{"o"},
-	Usage:       "Check if the packages have known vulnerabilities",
-	Destination: &osvFlag,
-}
-
 var flagGitOrg = &cli.StringFlag{
 	Name:        "repository",
 	Usage:       "Git repository to operate on",
 	Destination: &gitOrg,
 }
 
-var flagArch = &cli.StringFlag{
-	Name:        "arch",
-	Usage:       "Architecture to build for",
-	Destination: &archFlag,
-}
-
-var flagOS = &cli.StringFlag{
-	Name:        "os",
-	Usage:       "Operating system to build for",
-	Destination: &osFlag,
+var flagVars = &cli.StringFlag{
+	Name:        "vars",
+	Aliases:     []string{"v"},
+	Usage:       "Variables for template in format key1=value1,key2=value2",
+	Destination: &varsFlag,
 }

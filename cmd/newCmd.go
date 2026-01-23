@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/navigator-systems/jrx/internal/config"
 	"github.com/navigator-systems/jrx/internal/errors"
@@ -10,7 +11,26 @@ import (
 	"github.com/navigator-systems/jrx/internal/templates"
 )
 
-func NewCmd(projectName, templateName, gitOrg string) {
+func parseVars(varsString string) map[string]string {
+	vars := make(map[string]string)
+	if varsString == "" {
+		return vars
+	}
+	// Split por comas
+	pairs := strings.Split(varsString, ",")
+	for _, pair := range pairs {
+		// Split por =
+		kv := strings.SplitN(strings.TrimSpace(pair), "=", 2)
+		if len(kv) == 2 {
+			key := strings.TrimSpace(kv[0])
+			value := strings.Trim(strings.TrimSpace(kv[1]), "\"'") // Remove quotes
+			vars[key] = value
+		}
+	}
+	return vars
+}
+
+func NewCmd(projectName, templateName, varsString string) {
 	// Validate input
 	if projectName == "" {
 		fmt.Println("Error:", errors.ErrEmptyProjectName)
@@ -48,11 +68,22 @@ func NewCmd(projectName, templateName, gitOrg string) {
 		return
 	}
 
+	// Parse Variables
+	userVars := parseVars(varsString)
+
+	if len(userVars) > 0 {
+		//
+		for i := range tmpl.Variables {
+			fmt.Println(i)
+			if userValue, exists := userVars[tmpl.Variables[i].Key]; exists {
+				tmpl.Variables[i].Default = userValue
+				log.Printf("Variable '%s' set to: %s\n", tmpl.Variables[i].Key, userValue)
+			}
+		}
+	}
+
 	// Create project generator
 	pg := generator.NewProjectGenerator(tmpl, projectName, tm.GetTemplatesDir(), tm.GetFuncMap())
-	if gitOrg != "" {
-		pg.SetGitOrg(gitOrg)
-	}
 
 	// Generate the project
 	if err := pg.Generate(); err != nil {

@@ -38,11 +38,6 @@ func NewProjectGenerator(tmpl *templates.RootTemplate, projectName string, templ
 	}
 }
 
-// SetGitOrg sets the Git organization for the project
-func (pg *ProjectGenerator) SetGitOrg(gitOrg string) {
-	pg.gitOrg = gitOrg
-}
-
 // SetOutputDir sets a custom output directory (defaults to project name)
 func (pg *ProjectGenerator) SetOutputDir(dir string) {
 	pg.outputDir = dir

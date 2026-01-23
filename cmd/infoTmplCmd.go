@@ -39,6 +39,12 @@ func TmplInfoCmd() {
 		if len(tmpl.Tags) > 0 {
 			fmt.Printf("  Tags: %v\n", tmpl.Tags)
 		}
+		if len(tmpl.Variables) > 0 {
+			fmt.Println("  Variables:")
+			for _, v := range tmpl.Variables {
+				fmt.Printf("    - %s: %s (default: '%s')\n", v.Key, v.Description, v.Default)
+			}
+		}
 	}
 	fmt.Println("\nUse 'jrx project new <project_name> <template_name>' to create a new project from a template.")
 }

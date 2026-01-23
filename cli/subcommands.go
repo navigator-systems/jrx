@@ -16,11 +16,13 @@ var newCmd = &cli.Command{
 	Action: func(c *cli.Context) error {
 		name := c.Args().Get(0)
 		template := c.Args().Get(1)
-		cmd.NewCmd(name, template, gitOrg)
+
+		cmd.NewCmd(name, template, varsFlag)
+
 		return nil
 	},
 	Flags: []cli.Flag{
-		flagGitOrg,
+		flagVars,
 	},
 }
 

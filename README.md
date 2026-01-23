@@ -35,7 +35,6 @@ make compile
 - **Template-based Project Generation**: Create new projects from predefined templates
 - **Project Information**: Get detailed information about existing projects  
 - **Template Management**: Download and manage project templates
-- **Git Integration**: Automatic Git repository initialization for new projects
 
 ## Usage
 
@@ -53,6 +52,18 @@ jrx project new <project-name> <template-name>
 jrx project new my-web-app golang-web
 
 ```
+
+if the template supports variables:
+
+```bash
+# Create a new project from a template
+jrx project new -v var1="Value1",var2="Value2" <project-name> <template-name>
+
+# Example: Create a Go web service
+jrx project new -v author="MyName",team="DevLoginTeam" my-web-app golang-web
+
+```
+
 
 ### Template Commands
 
