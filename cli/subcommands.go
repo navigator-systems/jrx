@@ -17,12 +17,13 @@ var newCmd = &cli.Command{
 		name := c.Args().Get(0)
 		template := c.Args().Get(1)
 
-		cmd.NewCmd(name, template, varsFlag)
+		cmd.NewCmd(name, template, varsFlag, gitHubOrg)
 
 		return nil
 	},
 	Flags: []cli.Flag{
 		flagVars,
+		flagGitHubOrg,
 	},
 }
 
