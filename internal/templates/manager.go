@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,8 @@ import (
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/google/go-github/v58/github"
+	"github.com/navigator-systems/jrx/internal/adapters/scm"
 	"github.com/navigator-systems/jrx/internal/config"
 	"github.com/navigator-systems/jrx/internal/errors"
 )
@@ -213,4 +216,30 @@ func (tm *TemplateManager) GetTemplatesDir() string {
 // IsLoaded returns whether templates have been loaded
 func (tm *TemplateManager) IsLoaded() bool {
 	return tm.loaded
+}
+
+// CreateGitHubRepository creates a GitHub repository for a project using a template
+func (tm *TemplateManager) CreateGitHubRepository(ctx context.Context, projectName string, tmpl *RootTemplate, githubOrg string) (*github.Repository, error) {
+	log.Println("Creating GitHub repository...")
+
+	// Create GitHub client
+	ghClient, err := scm.NewGitHubClient(tm.config, githubOrg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GitHub client: %w", err)
+	}
+
+	// Create repository description from template
+	description := fmt.Sprintf("Project created from template: %s", tmpl.Name)
+	if tmpl.Description != "" {
+		description = tmpl.Description
+	}
+
+	// Create the repository (private by default)
+	repo, err := ghClient.CreateRepository(ctx, projectName, description, true)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Repository created: %s\n", repo.GetHTMLURL())
+	return repo, nil
 }

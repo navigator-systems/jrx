@@ -14,8 +14,18 @@ type JRXConfig struct {
 	TemplatesBranch  string `toml:"templates_branch"`
 	SshKeyPath       string `toml:"ssh_key_path"`
 	SshKeyPassphrase string `toml:"ssh_key_passphrase,omitempty"`
-	ServerAddress    string `toml:"server_address"`
-	ServerPort       int    `toml:"server_port"`
+	ServerPort       string `toml:"server_port"`
+
+	GitProvider JRXGitProvider `toml:"git_provider"`
+}
+
+type JRXGitProvider struct {
+	GithubToken        string   `toml:"github_token,omitempty"`
+	GithubURL          string   `toml:"github_url,omitempty"`
+	GithubOrganization []string `toml:"github_organization_url,omitempty"`
+
+	GitlabToken string `toml:"gitlab_token,omitempty"`
+	GitlabGroup string `toml:"gitlab_group,omitempty"`
 }
 
 func ReadJRXConfig() (JRXConfig, error) {

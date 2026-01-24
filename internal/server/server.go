@@ -20,11 +20,11 @@ type Server struct {
 }
 
 // NewServer creates a new server instance
-func NewServer(cfg config.JRXConfig, port string) *Server {
+func NewServer(cfg config.JRXConfig) *Server {
 	return &Server{
 		config:          cfg,
 		templateManager: templates.NewTemplateManager(cfg),
-		port:            port,
+		port:            cfg.ServerPort,
 	}
 }
 
