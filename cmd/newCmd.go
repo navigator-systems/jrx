@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -30,7 +31,7 @@ func parseVars(varsString string) map[string]string {
 	return vars
 }
 
-func NewCmd(projectName, templateName, varsString string) {
+func NewCmd(projectName, templateName, varsString, githubOrg string) {
 	// Validate input
 	if projectName == "" {
 		fmt.Println("Error:", errors.ErrEmptyProjectName)
@@ -93,4 +94,17 @@ func NewCmd(projectName, templateName, varsString string) {
 
 	fmt.Printf("✓ Project '%s' created successfully from template '%s'\n", projectName, templateName)
 	log.Printf("Project directory: %s\n", pg.GetOutputDir())
+
+	if githubOrg != "" {
+		// Create GitHub repository
+		ctx := context.Background()
+		repo, err := tm.CreateGitHubRepository(ctx, projectName, tmpl, githubOrg)
+		if err != nil {
+			fmt.Printf("Warning: Failed to create GitHub repository: %v\n", err)
+			fmt.Println("Project files were created successfully, but you'll need to create the repository manually.")
+			return
+		}
+
+		fmt.Printf("✓ GitHub repository created: %s\n", repo.GetHTMLURL())
+	}
 }

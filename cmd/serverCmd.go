@@ -16,14 +16,9 @@ func ServerCmd(port string) {
 		return
 	}
 
-	// Default port if not specified
-	if port == "" {
-		port = "8080"
-	}
-
 	// Create and start server
-	srv := server.NewServer(jrxConfig, port)
-	log.Printf("Starting JRX server on port %s...\n", port)
+	srv := server.NewServer(jrxConfig)
+	log.Printf("Starting JRX server on port %s...\n", jrxConfig.ServerPort)
 
 	if err := srv.Start(); err != nil {
 		log.Fatalf("Error starting server: %v\n", err)
