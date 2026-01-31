@@ -7,7 +7,11 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"context"
+
+	"github.com/google/go-github/v58/github"
 	"github.com/navigator-systems/jrx/internal/adapters/scm"
+	"github.com/navigator-systems/jrx/internal/config"
 	"github.com/navigator-systems/jrx/internal/errors"
 	"github.com/navigator-systems/jrx/internal/templates"
 )
@@ -20,6 +24,7 @@ type ProjectGenerator struct {
 	gitOrg       string
 	templatesDir string
 	funcMap      template.FuncMap
+	config       config.JRXConfig
 }
 
 var skipFiles = []string{
@@ -28,13 +33,18 @@ var skipFiles = []string{
 }
 
 // NewProjectGenerator creates a new ProjectGenerator instance
-func NewProjectGenerator(tmpl *templates.RootTemplate, projectName string, templatesDir string, funcMap template.FuncMap) *ProjectGenerator {
+func NewProjectGenerator(tmpl *templates.RootTemplate,
+	projectName string,
+	templatesDir string,
+	funcMap template.FuncMap,
+	cfg config.JRXConfig) *ProjectGenerator {
 	return &ProjectGenerator{
 		template:     tmpl,
 		projectName:  projectName,
 		outputDir:    projectName,
 		templatesDir: templatesDir,
 		funcMap:      funcMap,
+		config:       cfg,
 	}
 }
 
@@ -163,6 +173,64 @@ func (pg *ProjectGenerator) initializeGit() error {
 	scm.GitAddCommmit(pg.outputDir)
 
 	log.Println("Git repository initialized successfully")
+	return nil
+}
+
+// createGitHubRepository creates a GitHub repository
+func (pg *ProjectGenerator) CreateGitHubRepository(ctx context.Context, githubOrg string) (*github.Repository, error) {
+	// Import the scm package at the top if not already done
+	ghClient, err := scm.NewGitHubClient(pg.config, githubOrg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GitHub client: %w", err)
+	}
+
+	// Create repository description from template
+	description := fmt.Sprintf("Project created from template: %s", pg.template.Name)
+	if pg.template.Description != "" {
+		description = pg.template.Description
+	}
+
+	// Create the repository (private by default)
+	repo, err := ghClient.CreateRepository(ctx, pg.projectName, description, true)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Repository created: %s\n", repo.GetHTMLURL())
+	return repo, nil
+}
+
+func (pg *ProjectGenerator) CreateAndPushToGitHub(ctx context.Context, githubOrg string) error {
+	log.Println("Creating GitHub repository and pushing code...")
+
+	// Create GitHub repository
+	repo, err := pg.CreateGitHubRepository(ctx, githubOrg)
+	if err != nil {
+		return fmt.Errorf("failed to create GitHub repository: %w", err)
+	}
+
+	// Add remote and push
+	if err := pg.pushToRemote(repo); err != nil {
+		return fmt.Errorf("failed to push to GitHub: %w", err)
+	}
+
+	log.Printf("✓ Project successfully pushed to: %s\n", repo.GetHTMLURL())
+	return nil
+}
+
+// pushToRemote adds the remote and pushes the code
+func (pg *ProjectGenerator) pushToRemote(repo *github.Repository) error {
+	// Add remote using SSH URL
+	sshURL := repo.GetSSHURL()
+	if err := scm.GitAddRemote(pg.outputDir, "origin", sshURL); err != nil {
+		return err
+	}
+
+	// Push to GitHub
+	if err := scm.GitPush(pg.outputDir, "origin", "main", pg.config.SshKeyPath, pg.config.SshKeyPassphrase); err != nil {
+		return err
+	}
+
 	return nil
 }
 

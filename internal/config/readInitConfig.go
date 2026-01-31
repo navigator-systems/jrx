@@ -10,13 +10,23 @@ import (
 // This config is used for jrx to know about the templates repository and the server configuration
 // This is not for reading each jrx project, but for the jrx system itself
 type JRXConfig struct {
-	TemplatesRepo    string `toml:"templates_repo"`
-	TemplatesBranch  string `toml:"templates_branch"`
-	SshKeyPath       string `toml:"ssh_key_path"`
-	SshKeyPassphrase string `toml:"ssh_key_passphrase,omitempty"`
-	ServerPort       string `toml:"server_port"`
+	TemplatesRepo    string         `toml:"templates_repo"`
+	TemplatesBranch  string         `toml:"templates_branch"`
+	SshKeyPath       string         `toml:"ssh_key_path"`
+	SshKeyPassphrase string         `toml:"ssh_key_passphrase,omitempty"`
+	ServerPort       string         `toml:"server_port"`
+	GitProvider      JRXGitProvider `toml:"git_provider"`
+	Database         JRXDataBase    `toml:"data_base"`
+}
 
-	GitProvider JRXGitProvider `toml:"git_provider"`
+type JRXDataBase struct {
+	Database   string `toml:"database,omitempty"`    // sqlite or postgres
+	DBHost     string `toml:"db_host,omitempty"`     // postgres
+	DBPort     int    `toml:"db_port,omitempty"`     // postgres
+	DBUser     string `toml:"db_user,omitempty"`     // postgres
+	DBPassword string `toml:"db_password,omitempty"` // postgres
+	DBName     string `toml:"db_name,omitempty"`     // postgres
+	DBPath     string `toml:"db_path,omitempty"`     //sqlite
 }
 
 type JRXGitProvider struct {
