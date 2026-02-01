@@ -83,7 +83,7 @@
                     <span class="nav-arrow expanded">▶</span>
                 </div>
                 <div class="submenu expanded" id="projects-menu">
-                    <a href="/new-project" class="submenu-item" style="background: rgba(0,0,0,0.2); color: white; font-weight: 600;">Create Project</a>
+                    <a href="/project" class="submenu-item" style="background: rgba(0,0,0,0.2); color: white; font-weight: 600;">Create Project</a>
                     <a href="/github-orgs" class="submenu-item">GitHub Organizations</a>
                 </div>
             </div>
@@ -110,7 +110,7 @@
             </div>
             {{end}}
             
-            <form method="POST" action="/new-project">
+            <form method="POST" action="/project">
                 <label for="templateName">Template</label>
                 <select id="templateName" name="templateName" onchange="updateVariables()" required>
                     <option value="">-- Select a template --</option>

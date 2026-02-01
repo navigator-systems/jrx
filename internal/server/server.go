@@ -51,9 +51,9 @@ func (s *Server) Start() error {
 	// Setup routes - specific routes must be registered before the root
 	mux.HandleFunc("/templates/download", s.handleDownloadTemplates)
 	mux.HandleFunc("/templates", s.handleTemplates)
-	mux.HandleFunc("/new-project", s.handleNewProject)
+
 	mux.HandleFunc("/github-orgs", s.handleGithubOrgs)
-	mux.HandleFunc("/project", s.handleNewProject) // Keep /project as alias for backwards compatibility
+	mux.HandleFunc("/project", s.handleNewProject) // New project creation
 
 	mux.HandleFunc("/", s.handleIndex)
 
