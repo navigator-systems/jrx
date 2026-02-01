@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Created</title>
+    <title>GitHub Organizations</title>
     <style>
-        /* ... Copia los estilos base de templates.html aquí ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; }
         .sidebar { width: 280px; background: linear-gradient(180deg, #e74c3c 0%, #c03a2b6b 100%); color: white; display: flex; flex-direction: column; box-shadow: 4px 0 15px rgba(0,0,0,0.1); position: fixed; height: 100vh; overflow-y: auto; }
@@ -38,14 +37,18 @@
         .content-header { margin-bottom: 40px; }
         .content-title { font-size: 3em; color: #2c3e50; margin-bottom: 15px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
         .content-description { font-size: 1.2em; color: #7f8c8d; line-height: 1.6; }
-        .content-card { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: center; }
+        .content-card { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
         .content-card h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8em; }
         .content-card p { color: #7f8c8d; line-height: 1.8; margin-bottom: 15px; }
-        .result-section { background: #f8f9fa; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 30px; text-align: left; }
-        .result-section label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500; }
-        .result-section .result-value { background: #fff; border-radius: 6px; padding: 10px; border: 1px solid #ccc; margin-bottom: 18px; font-size: 1em; color: #333; }
-        .result-section .result-label { font-weight: bold; color: #e74c3c; }
-        .result-section .result-path { color: #2980b9; font-size: 1.1em; }
+        .org-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin-top: 30px; }
+        .org-card { background: white; border: 2px solid #e9ecef; border-radius: 12px; padding: 30px; text-align: left; transition: all 0.3s ease; }
+        .org-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3); border-color: #e74c3c; }
+        .org-card h3 { color: #e74c3c; margin-bottom: 15px; font-size: 1.5em; display: flex; align-items: center; gap: 10px; }
+        .org-card a { color: #2980b9; text-decoration: none; font-weight: 500; }
+        .org-card a:hover { text-decoration: underline; }
+        .config-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #e74c3c; }
+        .config-info strong { color: #2c3e50; }
+        .config-info code { background: #ecf0f1; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -84,7 +87,7 @@
                 </div>
                 <div class="submenu expanded" id="projects-menu">
                     <a href="/new-project" class="submenu-item">Create Project</a>
-                    <a href="/github-orgs" class="submenu-item">GitHub Organizations</a>
+                    <a href="/github-orgs" class="submenu-item" style="background: rgba(0,0,0,0.2); color: white; font-weight: 600;">GitHub Organizations</a>
                 </div>
             </div>
         </nav>
@@ -93,61 +96,68 @@
             <p><a href="https://github.com/navigator-systems/jrx" style="color: rgba(255,255,255,0.9);">GitHub</a></p>
         </div>
     </div>
+
     <!-- Main Content -->
     <div class="main-content">
         <div class="breadcrumb">
-            <a href="/">JRX</a> &gt; <a href="/projects">Projects</a> &gt; Project Created
+            <a href="/">JRX</a> &gt; <a href="/projects">Projects</a> &gt; GitHub Organizations
         </div>
+        
         <div class="content-header">
-            <h1 class="content-title">Project Created</h1>
-            <p class="content-description">Your new project has been successfully created!</p>
+            <h1 class="content-title">GitHub Organizations</h1>
+            <p class="content-description">
+                View and manage your configured GitHub organizations from .jrxrc
+            </p>
         </div>
-        <!-- Project result info -->
-        <div class="content-card">
-            <h2>Project Details</h2>
-            <div class="result-section">
-                <div class="result-label">Project Name:</div>
-                <div class="result-value">{{.ProjectName}}</div>
-                <div class="result-label">Template:</div>
-                <div class="result-value">{{.TemplateName}}</div>
-                {{if .OutputDir}}
-                <div class="result-label">Local Directory:</div>
-                <div class="result-value result-path">{{.OutputDir}}</div>
-                {{end}}
-                {{if .GithubOrg}}
-                <div class="result-label">GitHub Organization:</div>
-                <div class="result-value">{{.GithubOrg}}</div>
-                {{end}}
-                {{if .GithubRepoURL}}
-                <div class="result-label">GitHub Repository:</div>
-                <div class="result-value">
-                    <a href="{{.GithubRepoURL}}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: 600;">
-                        {{.GithubRepoURL}} →
-                    </a>
-                </div>
-                <div class="result-label">Clone Instructions:</div>
-                <div class="result-value" style="background: #ecf0f1; padding: 15px; border-radius: 6px; font-family: monospace;">
-                    <strong>To download and work on this project:</strong><br><br>
-                    git clone {{.GithubRepoURL}}.git<br>
-                    cd {{.ProjectName}}
-                </div>
-                {{end}}
-                {{if .Variables}}
-                <div class="result-label">Variables:</div>
-                <div class="result-value">
-                    {{range $key, $value := .Variables}}
-                    <div><strong>{{$key}}:</strong> {{$value}}</div>
+
+        <!-- Configuration Info -->
+        <div class="config-info">
+            <strong>📍 Configuration File:</strong> <code>~/.jrxrc</code><br>
+            {{if .GithubURL}}
+            <strong>🔗 GitHub URL:</strong> <code>{{.GithubURL}}</code><br>
+            {{end}}
+            {{if .HasToken}}
+            <strong>🔑 Token:</strong> <span style="color: #27ae60;">✓ Configured</span>
+            {{else}}
+            <strong>🔑 Token:</strong> <span style="color: #e74c3c;">✗ Not configured</span>
+            {{end}}
+        </div>
+
+        <!-- Organizations Display -->
+        {{if .Organizations}}
+            <div class="content-card">
+                <h2>Configured Organizations ({{len .Organizations}})</h2>
+                <div class="org-grid">
+                    {{range .Organizations}}
+                    <div class="org-card">
+                        <h3>🏢 {{.}}</h3>
+                        <p style="color: #7f8c8d; margin-bottom: 15px;">GitHub Organization</p>
+                        <a href="{{$.GithubURL}}/{{.}}" target="_blank">View on GitHub →</a>
+                    </div>
                     {{end}}
                 </div>
-                {{end}}
-                {{if .Message}}
-                <div class="result-label">Status:</div>
-                <div class="result-value" style="white-space: pre-line;">{{.Message}}</div>
-                {{end}}
-                <!-- TODO: Add more project details or links here -->
             </div>
-        </div>
+        {{else}}
+            <div class="content-card" style="text-align: center; padding: 60px 20px;">
+                <h2 style="color: #7f8c8d; margin-bottom: 15px;">No Organizations Configured</h2>
+                <p style="color: #95a5a6;">
+                    Add GitHub organizations to your <code>~/.jrxrc</code> file to see them here.
+                </p>
+                <div style="background: #ecf0f1; padding: 20px; border-radius: 8px; margin-top: 30px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <strong>Example configuration:</strong>
+                    <pre style="margin-top: 10px; color: #2c3e50; font-family: monospace; line-height: 1.6;">
+[git_provider]
+github_url = "https://github.com"
+github_token = "your-token-here"
+github_organization_url = [
+    "navigator-systems",
+    "your-org-name"
+]</pre>
+                </div>
+            </div>
+        {{end}}
     </div>
+
     <script>
         function toggleSubmenu(menuId, linkElement) {
             const submenu = document.getElementById(menuId);
@@ -156,6 +166,7 @@
             arrow.classList.toggle('expanded');
             linkElement.classList.toggle('active');
         }
+        
         document.querySelector('.search-input').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const navItems = document.querySelectorAll('.nav-item');

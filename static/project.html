@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Created</title>
+    <title>Create Project</title>
     <style>
         /* ... Copia los estilos base de templates.html aquí ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,14 +38,14 @@
         .content-header { margin-bottom: 40px; }
         .content-title { font-size: 3em; color: #2c3e50; margin-bottom: 15px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
         .content-description { font-size: 1.2em; color: #7f8c8d; line-height: 1.6; }
-        .content-card { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: center; }
+        .content-card { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
         .content-card h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8em; }
         .content-card p { color: #7f8c8d; line-height: 1.8; margin-bottom: 15px; }
-        .result-section { background: #f8f9fa; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 30px; text-align: left; }
-        .result-section label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500; }
-        .result-section .result-value { background: #fff; border-radius: 6px; padding: 10px; border: 1px solid #ccc; margin-bottom: 18px; font-size: 1em; color: #333; }
-        .result-section .result-label { font-weight: bold; color: #e74c3c; }
-        .result-section .result-path { color: #2980b9; font-size: 1.1em; }
+        .form-section { background: #f8f9fa; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 30px; }
+        .form-section label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500; }
+        .form-section input, .form-section select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 18px; font-size: 1em; }
+        .form-section button { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 1em; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .form-section button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
     </style>
 </head>
 <body>
@@ -53,8 +53,8 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <img src="/images/jrx_no_bg.png" alt="JRX Logo" class="sidebar-logo">
-            <div class="sidebar-title">JRX</div>
-            <div class="sidebar-subtitle">Project Generator</div>
+            <div class="sidebar-title">Projects</div>
+            <div class="sidebar-subtitle">Create New Projects from templates</div>
         </div>
         <div class="search-box">
             <input type="text" class="search-input" placeholder="🔍 Search...">
@@ -83,7 +83,7 @@
                     <span class="nav-arrow expanded">▶</span>
                 </div>
                 <div class="submenu expanded" id="projects-menu">
-                    <a href="/new-project" class="submenu-item">Create Project</a>
+                    <a href="/new-project" class="submenu-item" style="background: rgba(0,0,0,0.2); color: white; font-weight: 600;">Create Project</a>
                     <a href="/github-orgs" class="submenu-item">GitHub Organizations</a>
                 </div>
             </div>
@@ -96,56 +96,65 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="breadcrumb">
-            <a href="/">JRX</a> &gt; <a href="/projects">Projects</a> &gt; Project Created
+            <a href="/">JRX</a> &gt; <a href="/projects">Projects</a> &gt; Create Project
         </div>
         <div class="content-header">
-            <h1 class="content-title">Project Created</h1>
-            <p class="content-description">Your new project has been successfully created!</p>
+            <h1 class="content-title">Create New Project</h1>
+            <p class="content-description">Fill in the details below to generate a new project from a template.</p>
         </div>
-        <!-- Project result info -->
-        <div class="content-card">
-            <h2>Project Details</h2>
-            <div class="result-section">
-                <div class="result-label">Project Name:</div>
-                <div class="result-value">{{.ProjectName}}</div>
-                <div class="result-label">Template:</div>
-                <div class="result-value">{{.TemplateName}}</div>
-                {{if .OutputDir}}
-                <div class="result-label">Local Directory:</div>
-                <div class="result-value result-path">{{.OutputDir}}</div>
-                {{end}}
-                {{if .GithubOrg}}
-                <div class="result-label">GitHub Organization:</div>
-                <div class="result-value">{{.GithubOrg}}</div>
-                {{end}}
-                {{if .GithubRepoURL}}
-                <div class="result-label">GitHub Repository:</div>
-                <div class="result-value">
-                    <a href="{{.GithubRepoURL}}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: 600;">
-                        {{.GithubRepoURL}} →
-                    </a>
-                </div>
-                <div class="result-label">Clone Instructions:</div>
-                <div class="result-value" style="background: #ecf0f1; padding: 15px; border-radius: 6px; font-family: monospace;">
-                    <strong>To download and work on this project:</strong><br><br>
-                    git clone {{.GithubRepoURL}}.git<br>
-                    cd {{.ProjectName}}
-                </div>
-                {{end}}
-                {{if .Variables}}
-                <div class="result-label">Variables:</div>
-                <div class="result-value">
-                    {{range $key, $value := .Variables}}
-                    <div><strong>{{$key}}:</strong> {{$value}}</div>
+        <!-- Project creation form -->
+        <div class="form-section">
+            {{if .Error}}
+            <div style="background: #fff3cd; border-left: 5px solid #ffc107; color: #856404; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <strong>Error:</strong> {{.Error}}
+            </div>
+            {{end}}
+            
+            <form method="POST" action="/new-project">
+                <label for="templateName">Template</label>
+                <select id="templateName" name="templateName" onchange="updateVariables()" required>
+                    <option value="">-- Select a template --</option>
+                    {{range $key, $template := .Templates}}
+                    <option value="{{$key}}">{{$template.Name}} - {{$template.Description}}</option>
+                    {{end}}
+                </select>
+                
+                <label for="projectName">Project Name</label>
+                <input type="text" id="projectName" name="projectName" required>
+                
+                <label for="githubOrg">GitHub Organization (Optional)</label>
+                <select id="githubOrg" name="githubOrg">
+                    <option value="">-- None (Create locally only) --</option>
+                    {{range .Organizations}}
+                    <option value="{{.}}">{{.}}</option>
+                    {{end}}
+                </select>
+                <p style="color: #7f8c8d; font-size: 0.9em; margin-top: -10px; margin-bottom: 15px;">
+                    💡 Select an organization to create and push the project to GitHub automatically.
+                </p>
+                
+                <!-- Variables section (dynamically populated based on selected template) -->
+                <div id="variables-section" style="margin-top: 20px;">
+                    <!-- Variables will be rendered here based on template selection -->
+                    {{if .Templates}}
+                    {{range $key, $template := .Templates}}
+                    <div id="vars-{{$key}}" class="template-vars" style="display: none;">
+                        {{if $template.Variables}}
+                        <h3 style="color: #2c3e50; margin-bottom: 15px; font-size: 1.3em;">Template Variables</h3>
+                        {{range $template.Variables}}
+                        <label for="var_{{.Key}}">{{.Key}} - {{.Description}}</label>
+                        <input type="text" id="var_{{.Key}}" name="var_{{.Key}}" value="{{.Default}}" placeholder="{{.Description}}">
+                        {{end}}
+                        {{else}}
+                        <p style="color: #7f8c8d; font-style: italic;">No variables defined for this template.</p>
+                        {{end}}
+                    </div>
+                    {{end}}
                     {{end}}
                 </div>
-                {{end}}
-                {{if .Message}}
-                <div class="result-label">Status:</div>
-                <div class="result-value" style="white-space: pre-line;">{{.Message}}</div>
-                {{end}}
-                <!-- TODO: Add more project details or links here -->
-            </div>
+                
+                <button type="submit">Create Project</button>
+            </form>
         </div>
     </div>
     <script>
@@ -156,6 +165,24 @@
             arrow.classList.toggle('expanded');
             linkElement.classList.toggle('active');
         }
+        
+        function updateVariables() {
+            // Hide all variable sections
+            const allVarSections = document.querySelectorAll('.template-vars');
+            allVarSections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show the selected template's variables
+            const selectedTemplate = document.getElementById('templateName').value;
+            if (selectedTemplate) {
+                const varSection = document.getElementById('vars-' + selectedTemplate);
+                if (varSection) {
+                    varSection.style.display = 'block';
+                }
+            }
+        }
+        
         document.querySelector('.search-input').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const navItems = document.querySelectorAll('.nav-item');

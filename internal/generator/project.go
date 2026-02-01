@@ -1,13 +1,12 @@
 package generator
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"text/template"
-
-	"context"
 
 	"github.com/google/go-github/v58/github"
 	"github.com/navigator-systems/jrx/internal/adapters/scm"
@@ -242,4 +241,11 @@ func (pg *ProjectGenerator) GetOutputDir() string {
 // GetProjectName returns the project name
 func (pg *ProjectGenerator) GetProjectName() string {
 	return pg.projectName
+}
+
+// CleanupLocalFiles removes the locally created project files
+// This is useful when the project has been pushed to GitHub from a server
+func (pg *ProjectGenerator) CleanupLocalFiles() error {
+	log.Printf("Cleaning up local files at: %s\n", pg.outputDir)
+	return os.RemoveAll(pg.outputDir)
 }
