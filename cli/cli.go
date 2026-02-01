@@ -14,6 +14,7 @@ func InitCli() {
 		Commands: []*cli.Command{
 			projectCmd,
 			templatesCmd,
+			serverCmd,
 		},
 	}
 	if err := app.Run(os.Args); err != nil {

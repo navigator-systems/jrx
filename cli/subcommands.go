@@ -17,12 +17,13 @@ var newCmd = &cli.Command{
 		name := c.Args().Get(0)
 		template := c.Args().Get(1)
 
-		cmd.NewCmd(name, template, varsFlag)
+		cmd.NewCmd(name, template, varsFlag, gitHubOrg)
 
 		return nil
 	},
 	Flags: []cli.Flag{
 		flagVars,
+		flagGitHubOrg,
 	},
 }
 
@@ -44,5 +45,20 @@ var tmplDownloadCmd = &cli.Command{
 
 		templates.InitTemplates()
 		return nil
+	},
+}
+
+// Server Command
+var serverCmd = &cli.Command{
+	Name:    "server",
+	Aliases: []string{"s", "serve"},
+	Usage:   "Start the JRX web server",
+	Action: func(c *cli.Context) error {
+		port := c.String("port")
+		cmd.ServerCmd(port)
+		return nil
+	},
+	Flags: []cli.Flag{
+		flagPort,
 	},
 }

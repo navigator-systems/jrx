@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -30,7 +31,7 @@ func parseVars(varsString string) map[string]string {
 	return vars
 }
 
-func NewCmd(projectName, templateName, varsString string) {
+func NewCmd(projectName, templateName, varsString, githubOrg string) {
 	// Validate input
 	if projectName == "" {
 		fmt.Println("Error:", errors.ErrEmptyProjectName)
@@ -83,7 +84,7 @@ func NewCmd(projectName, templateName, varsString string) {
 	}
 
 	// Create project generator
-	pg := generator.NewProjectGenerator(tmpl, projectName, tm.GetTemplatesDir(), tm.GetFuncMap())
+	pg := generator.NewProjectGenerator(tmpl, projectName, tm.GetTemplatesDir(), tm.GetFuncMap(), jrxConfig)
 
 	// Generate the project
 	if err := pg.Generate(); err != nil {
@@ -91,6 +92,19 @@ func NewCmd(projectName, templateName, varsString string) {
 		return
 	}
 
-	fmt.Printf("✓ Project '%s' created successfully from template '%s'\n", projectName, templateName)
+	fmt.Printf("Project '%s' created successfully from template '%s'\n", projectName, templateName)
 	log.Printf("Project directory: %s\n", pg.GetOutputDir())
+
+	if githubOrg != "" {
+		// Create GitHub repository
+		ctx := context.Background()
+		if err := pg.CreateAndPushToGitHub(ctx, githubOrg); err != nil {
+			fmt.Printf("Warning: Failed to create/push GitHub repository: %v\n", err)
+			fmt.Printf("Project was created locally. You can push manually:\n")
+			fmt.Printf("  cd %s\n", pg.GetOutputDir())
+			fmt.Printf("  git remote add origin <repo-url>\n")
+			fmt.Printf("  git push -u origin main\n")
+			return
+		}
+	}
 }
