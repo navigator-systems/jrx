@@ -10,8 +10,12 @@ import (
 // This config is used for jrx to know about the templates repository and the server configuration
 // This is not for reading each jrx project, but for the jrx system itself
 type JRXConfig struct {
-	TemplatesRepo    string         `toml:"templates_repo"`
-	TemplatesBranch  string         `toml:"templates_branch"`
+	TemplatesRepo     string   `toml:"templates_repo"`
+	TemplatesDefault  string   `toml:"templates_default,omitempty"`
+	TemplatesBranch   []string `toml:"templates_branches"`
+	TemplatesTag      []string `toml:"templates_tags"`
+	TemplatesCacheDir string   `toml:"templates_cache_dir,omitempty"` // Cache directory for templates
+
 	SshKeyPath       string         `toml:"ssh_key_path"`
 	SshKeyPassphrase string         `toml:"ssh_key_passphrase,omitempty"`
 	ServerPort       string         `toml:"server_port"`

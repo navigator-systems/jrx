@@ -35,7 +35,7 @@ func (s *Server) Start() error {
 	}
 
 	// Load templates
-	if err := s.templateManager.LoadTemplates(); err != nil {
+	if err := s.templateManager.LoadTemplates(""); err != nil {
 		log.Printf("Warning: Could not load templates: %v\n", err)
 	} else {
 		log.Println("Templates loaded successfully")
