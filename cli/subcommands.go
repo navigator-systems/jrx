@@ -17,13 +17,14 @@ var newCmd = &cli.Command{
 		name := c.Args().Get(0)
 		template := c.Args().Get(1)
 
-		cmd.NewCmd(name, template, varsFlag, gitHubOrg)
+		cmd.NewCmd(name, template, varsFlag, gitHubOrg, templateVersion)
 
 		return nil
 	},
 	Flags: []cli.Flag{
 		flagVars,
 		flagGitHubOrg,
+		templateVersionFlag,
 	},
 }
 
@@ -33,8 +34,11 @@ var tmplInfoCmd = &cli.Command{
 
 	Usage: "Get information about templates",
 	Action: func(c *cli.Context) error {
-		cmd.TmplInfoCmd()
+		cmd.TmplInfoCmd(templateVersion)
 		return nil
+	},
+	Flags: []cli.Flag{
+		templateVersionFlag,
 	},
 }
 

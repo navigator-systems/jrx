@@ -366,11 +366,25 @@
         <!-- Download/Refresh section -->
         <div class="content-card" style="background: #f8f9fa; text-align: center;">
             {{if .IsLoaded}}
-                <p style="margin-bottom: 15px; color: #27ae60;">✓ Templates loaded successfully</p>
+                <p style="margin-bottom: 10px; color: #27ae60;">✓ Templates loaded successfully</p>
+                {{if .Current}}
+                <p style="margin-bottom: 15px; color: #6c757d;">Versión actual: <strong>{{.Current}}</strong></p>
+                {{else}}
+                <p style="margin-bottom: 15px; color: #6c757d;">Versión actual: <strong>No seleccionada</strong></p>
+                {{end}}
             {{else}}
                 <p style="margin-bottom: 15px; color: #e67e22;">⚠️ Templates not loaded. Click below to download.</p>
             {{end}}
             <form method="POST" action="/templates/download">
+                <div style="max-width: 360px; margin: 0 auto 12px auto; text-align: left;">
+                    <label for="version" style="display: block; font-size: 0.9em; color: #495057; margin-bottom: 6px;">Versión de templates</label>
+                    <select id="version" name="version" class="search-input" style="background: #fff; color: #2c3e50; border: 1px solid #e0e0e0;">
+                        <option value="">Usar versión por defecto</option>
+                        {{range .Versions}}
+                        <option value="{{.}}" {{if eq $.Current .}}selected{{end}}>{{.}}</option>
+                        {{end}}
+                    </select>
+                </div>
                 <button type="submit" class="search-input" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 1em; cursor: pointer; margin-top: 10px;">
                     {{if .IsLoaded}}🔄 Refresh Templates{{else}}⬇️ Download Templates{{end}}
                 </button>

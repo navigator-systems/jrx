@@ -5,9 +5,10 @@ import (
 )
 
 var (
-	gitOrg    string
-	varsFlag  string
-	gitHubOrg string
+	gitOrg          string
+	varsFlag        string
+	gitHubOrg       string
+	templateVersion string
 )
 
 var projectCmd = &cli.Command{

@@ -43,10 +43,14 @@ func (s *Server) handleTemplates(w http.ResponseWriter, r *http.Request) {
 		Title     string
 		IsLoaded  bool
 		Templates []templates.RootTemplate
+		Versions  []string
+		Current   string
 		Error     string
 	}{
 		Title:    "JRX Templates",
 		IsLoaded: s.templateManager.IsLoaded(),
+		Versions: s.templateManager.GetAvailableVersions(),
+		Current:  s.templateManager.GetCurrentVersion(),
 	}
 
 	if s.templateManager.IsLoaded() {
@@ -77,7 +81,8 @@ func (s *Server) handleDownloadTemplates(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Reload templates
-	if err := s.templateManager.LoadTemplates(); err != nil {
+	selectedVersion := strings.TrimSpace(r.FormValue("version"))
+	if err := s.templateManager.LoadTemplates(selectedVersion); err != nil {
 		http.Error(w, fmt.Sprintf("Error loading templates: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -252,9 +257,9 @@ func (s *Server) createProject(projectName, templateName string, vars map[string
 			}
 		}
 	}
-
+	version := "main"
 	// Create project generator
-	pg := generator.NewProjectGenerator(tmpl, projectName, s.templateManager.GetTemplatesDir(), s.templateManager.GetFuncMap(), s.config)
+	pg := generator.NewProjectGenerator(tmpl, projectName, s.templateManager.GetTemplatesDir(), version, s.templateManager.GetFuncMap(), s.config)
 
 	// Generate the project
 	if err := pg.Generate(); err != nil {
@@ -316,4 +321,3 @@ func (s *Server) createProject(projectName, templateName string, vars map[string
 	log.Printf("Project '%s' created successfully from template '%s'\n", projectName, templateName)
 	return nil
 }
-

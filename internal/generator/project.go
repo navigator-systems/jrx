@@ -17,13 +17,14 @@ import (
 
 // ProjectGenerator handles project generation from templates
 type ProjectGenerator struct {
-	template     *templates.RootTemplate
-	projectName  string
-	outputDir    string
-	gitOrg       string
-	templatesDir string
-	funcMap      template.FuncMap
-	config       config.JRXConfig
+	template        *templates.RootTemplate
+	projectName     string
+	outputDir       string
+	gitOrg          string
+	templatesDir    string
+	templateVersion string
+	funcMap         template.FuncMap
+	config          config.JRXConfig
 }
 
 var skipFiles = []string{
@@ -35,15 +36,17 @@ var skipFiles = []string{
 func NewProjectGenerator(tmpl *templates.RootTemplate,
 	projectName string,
 	templatesDir string,
+	tmplVersion string,
 	funcMap template.FuncMap,
 	cfg config.JRXConfig) *ProjectGenerator {
 	return &ProjectGenerator{
-		template:     tmpl,
-		projectName:  projectName,
-		outputDir:    projectName,
-		templatesDir: templatesDir,
-		funcMap:      funcMap,
-		config:       cfg,
+		template:        tmpl,
+		projectName:     projectName,
+		outputDir:       projectName,
+		templatesDir:    templatesDir,
+		templateVersion: tmplVersion,
+		funcMap:         funcMap,
+		config:          cfg,
 	}
 }
 
@@ -55,6 +58,8 @@ func (pg *ProjectGenerator) SetOutputDir(dir string) {
 // Generate creates the project from the template
 func (pg *ProjectGenerator) Generate() error {
 	// Validate project
+	final := filepath.Join(pg.templatesDir, pg.templateVersion)
+	log.Println("Generating project:", pg.projectName, "from template:", pg.template.Name, "folder:", final)
 	if err := pg.validateProject(); err != nil {
 		return err
 	}
@@ -84,7 +89,9 @@ func (pg *ProjectGenerator) validateProject() error {
 	}
 
 	// Check if template path exists
-	templatePath := pg.template.GetFullPath(pg.templatesDir)
+
+	templatePath := pg.template.GetFullPath(pg.templatesDir, pg.templateVersion)
+	fmt.Println(templatePath)
 	if _, err := os.Stat(templatePath); err != nil {
 		return errors.NewError("validate project", errors.ErrTemplatePathMissing)
 	}
@@ -99,7 +106,7 @@ func (pg *ProjectGenerator) validateProject() error {
 
 // copyFiles walks through the template directory and processes all files
 func (pg *ProjectGenerator) copyFiles() error {
-	templatePath := pg.template.GetFullPath(pg.templatesDir)
+	templatePath := pg.template.GetFullPath(pg.templatesDir, pg.templateVersion)
 
 	// Set the project name in the template
 	pg.template.ProjectName = pg.projectName

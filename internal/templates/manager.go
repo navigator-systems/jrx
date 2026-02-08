@@ -18,10 +18,11 @@ import (
 
 // TemplateManager manages template operations
 type TemplateManager struct {
-	config       config.JRXConfig
-	templateFile TemplateFile
-	funcMap      template.FuncMap
-	loaded       bool
+	config         config.JRXConfig
+	templateFile   TemplateFile
+	funcMap        template.FuncMap
+	loaded         bool
+	currentVersion string
 }
 
 // NewTemplateManager creates a new TemplateManager instance
@@ -74,8 +75,13 @@ func (tm *TemplateManager) Initialize() error {
 		return errors.NewError("create version directories", err)
 	}
 
+	// Get versions of tags to clone based on pattern and max versions
+	tagVersions, err := tm.GetVersionsTags()
+	if err != nil {
+		return errors.NewError("get tag versions", err)
+	}
 	//Create directories for tag versions
-	if err := CreateDirsIfNotExist(tm.config.TemplatesCacheDir, tm.config.TemplatesTag); err != nil {
+	if err := CreateDirsIfNotExist(tm.config.TemplatesCacheDir, tagVersions); err != nil {
 		return errors.NewError("create version directories", err)
 	}
 
@@ -98,7 +104,7 @@ func (tm *TemplateManager) Initialize() error {
 	}
 
 	// Clone the repository for each tag
-	for _, tag := range tm.config.TemplatesTag {
+	for _, tag := range tagVersions {
 		repoDest := filepath.Join(tm.config.TemplatesCacheDir, tag)
 		_, err = git.PlainClone(repoDest, false, &git.CloneOptions{
 			URL:           tm.config.TemplatesRepo,
@@ -124,6 +130,12 @@ func (tm *TemplateManager) LoadTemplates(templatesVersion string) error {
 	if templatesVersion == "" {
 		templatesVersion = tm.config.TemplatesDefault
 	}
+	log.Println("Template version is:", templatesVersion)
+
+	if !tm.ValidateVersion(templatesVersion) {
+		return errors.NewError("Load templates", fmt.Errorf("Version %s is not available", templatesVersion))
+	}
+
 	templatePath := filepath.Join(tm.config.TemplatesCacheDir, templatesVersion, "templates.toml")
 	if _, err := os.Stat(templatePath); err != nil {
 		return errors.NewError("find templates.toml", errors.ErrConfigNotFound)
@@ -215,20 +227,6 @@ func (tm *TemplateManager) GetTemplate(name string) (*RootTemplate, error) {
 	}
 
 	return &tpl, nil
-}
-
-// ListAll returns all available templates
-func (tm *TemplateManager) ListAll() ([]RootTemplate, error) {
-	if !tm.loaded {
-		return nil, errors.NewError("list templates", errors.ErrLoadTemplates)
-	}
-
-	templates := make([]RootTemplate, 0, len(tm.templateFile.Templates))
-	for _, tpl := range tm.templateFile.Templates {
-		templates = append(templates, tpl)
-	}
-
-	return templates, nil
 }
 
 // GetTemplatesMap returns the templates map

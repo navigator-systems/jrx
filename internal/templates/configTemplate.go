@@ -39,8 +39,10 @@ func (rt *RootTemplate) HasTag(tag string) bool {
 }
 
 // GetFullPath returns the full path to the template directory
-func (rt *RootTemplate) GetFullPath(baseDir string) string {
-	return filepath.Join(baseDir, rt.Path)
+func (rt *RootTemplate) GetFullPath(baseDir, version string) string {
+	fullPath := filepath.Join(baseDir, version, rt.Path)
+
+	return fullPath
 }
 
 // GetVariableWithFallback returns the variable value or a fallback if not found
