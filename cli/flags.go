@@ -24,3 +24,10 @@ var flagGitHubOrg = &cli.StringFlag{
 	Usage:       "GitHub organization URL to operate on",
 	Destination: &gitHubOrg,
 }
+
+var templateVersionFlag = &cli.StringFlag{
+	Name:        "template-version",
+	Aliases:     []string{"t"},
+	Usage:       "Version of the template to use (e.g., main, v1.2.3). If not specified, uses the default version from config.",
+	Destination: &templateVersion,
+}

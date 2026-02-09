@@ -13,6 +13,7 @@ type Server struct {
 	config          config.JRXConfig
 	templateManager *templates.TemplateManager
 	port            string
+	currentVersion  string
 }
 
 // NewServer creates a new server instance
@@ -21,6 +22,7 @@ func NewServer(cfg config.JRXConfig) *Server {
 		config:          cfg,
 		templateManager: templates.NewTemplateManager(cfg),
 		port:            cfg.ServerPort,
+		currentVersion:  cfg.TemplatesDefault,
 	}
 }
 
@@ -34,8 +36,9 @@ func (s *Server) Start() error {
 		log.Println("Templates initialized successfully")
 	}
 
+	defaultVersion := s.config.TemplatesDefault
 	// Load templates
-	if err := s.templateManager.LoadTemplates(); err != nil {
+	if err := s.templateManager.LoadTemplates(defaultVersion); err != nil {
 		log.Printf("Warning: Could not load templates: %v\n", err)
 	} else {
 		log.Println("Templates loaded successfully")
@@ -50,6 +53,7 @@ func (s *Server) Start() error {
 
 	// Setup routes - specific routes must be registered before the root
 	mux.HandleFunc("/templates/download", s.handleDownloadTemplates)
+	//mux.HandleFunc("/templates/switch-version", s.handleSwitchVersion)
 	mux.HandleFunc("/templates", s.handleTemplates)
 
 	mux.HandleFunc("/github-orgs", s.handleGithubOrgs)

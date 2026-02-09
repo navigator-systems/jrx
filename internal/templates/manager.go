@@ -9,29 +9,36 @@ import (
 	"text/template"
 
 	"github.com/BurntSushi/toml"
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/navigator-systems/jrx/internal/config"
 	"github.com/navigator-systems/jrx/internal/errors"
 )
 
+type TemplatesSnapshot struct {
+	Templates map[string]RootTemplate
+	Count     int
+	Version   string
+}
+
 // TemplateManager manages template operations
 type TemplateManager struct {
-	config       config.JRXConfig
-	templateFile TemplateFile
-	templatesDir string
-	funcMap      template.FuncMap
-	loaded       bool
+	config         config.JRXConfig
+	templateFile   TemplateFile
+	funcMap        template.FuncMap
+	loaded         bool
+	currentVersion string
+	cache          map[string]TemplatesSnapshot
 }
 
 // NewTemplateManager creates a new TemplateManager instance
 func NewTemplateManager(cfg config.JRXConfig) *TemplateManager {
 	return &TemplateManager{
-		config:       cfg,
-		templatesDir: "jrxTemplates",
-		funcMap:      buildFuncMap(),
-		loaded:       false,
+		config:  cfg,
+		funcMap: buildFuncMap(),
+		loaded:  false,
+		cache:   make(map[string]TemplatesSnapshot),
 	}
 }
 
@@ -60,10 +67,30 @@ func (tm *TemplateManager) Initialize() error {
 	log.Println("Downloading templates...")
 
 	// Remove existing templates directory if it exists
-	if _, err := os.Stat(tm.templatesDir); err == nil {
-		if err := os.RemoveAll(tm.templatesDir); err != nil {
+	if _, err := os.Stat(tm.config.TemplatesCacheDir); err == nil {
+		if err := os.RemoveAll(tm.config.TemplatesCacheDir); err != nil {
 			return errors.NewError("remove templates directory", err)
 		}
+	}
+
+	//Create cache directory if it doesn't exist
+	if err := CreateCacheDir(tm.config.TemplatesCacheDir); err != nil {
+		return errors.NewError("create cache directory", err)
+	}
+
+	// Create directories for branch versions
+	if err := CreateDirsIfNotExist(tm.config.TemplatesCacheDir, tm.config.TemplatesBranch); err != nil {
+		return errors.NewError("create version directories", err)
+	}
+
+	// Get versions of tags to clone based on pattern and max versions
+	tagVersions, err := tm.GetVersionsTags()
+	if err != nil {
+		return errors.NewError("get tag versions", err)
+	}
+	//Create directories for tag versions
+	if err := CreateDirsIfNotExist(tm.config.TemplatesCacheDir, tagVersions); err != nil {
+		return errors.NewError("create version directories", err)
 	}
 
 	// Setup SSH authentication
@@ -72,14 +99,29 @@ func (tm *TemplateManager) Initialize() error {
 		return errors.NewError("create SSH keys", err)
 	}
 
-	// Clone the repository
-	_, err = git.PlainClone(tm.templatesDir, false, &git.CloneOptions{
-		URL:           tm.config.TemplatesRepo,
-		ReferenceName: plumbing.NewBranchReferenceName(tm.config.TemplatesBranch),
-		SingleBranch:  true,
-		Auth:          publicKeys,
-		Depth:         1,
-	})
+	// Clone the repository for each branch
+	for _, branch := range tm.config.TemplatesBranch {
+		repoDest := filepath.Join(tm.config.TemplatesCacheDir, branch)
+		_, err = git.PlainClone(repoDest, false, &git.CloneOptions{
+			URL:           tm.config.TemplatesRepo,
+			ReferenceName: plumbing.NewBranchReferenceName(branch),
+			SingleBranch:  true,
+			Auth:          publicKeys,
+			Depth:         1,
+		})
+	}
+
+	// Clone the repository for each tag
+	for _, tag := range tagVersions {
+		repoDest := filepath.Join(tm.config.TemplatesCacheDir, tag)
+		_, err = git.PlainClone(repoDest, false, &git.CloneOptions{
+			URL:           tm.config.TemplatesRepo,
+			ReferenceName: plumbing.NewTagReferenceName(tag),
+			SingleBranch:  true,
+			Auth:          publicKeys,
+			Depth:         1,
+		})
+	}
 
 	if err != nil {
 		return errors.NewError("clone template repository", err)
@@ -90,10 +132,27 @@ func (tm *TemplateManager) Initialize() error {
 }
 
 // LoadTemplates loads all templates from the templates directory
-func (tm *TemplateManager) LoadTemplates() error {
+func (tm *TemplateManager) LoadTemplates(templatesVersion string) error {
 	log.Println("Loading templates...")
 
-	templatePath := filepath.Join(tm.templatesDir, "templates.toml")
+	if templatesVersion == "" {
+		templatesVersion = tm.config.TemplatesDefault
+	}
+	log.Println("Template version is:", templatesVersion)
+
+	if !tm.ValidateVersion(templatesVersion) {
+		return errors.NewError("Load templates", fmt.Errorf("Version %s is not available", templatesVersion))
+	}
+
+	if snapshot, ok := tm.cache[templatesVersion]; ok {
+		tm.templateFile.Templates = snapshot.Templates
+		tm.loaded = true
+		tm.currentVersion = templatesVersion
+		log.Printf("Loaded templates from cache for version '%s'\n", templatesVersion)
+		return nil
+	}
+
+	templatePath := filepath.Join(tm.config.TemplatesCacheDir, templatesVersion, "templates.toml")
 	if _, err := os.Stat(templatePath); err != nil {
 		return errors.NewError("find templates.toml", errors.ErrConfigNotFound)
 	}
@@ -105,7 +164,7 @@ func (tm *TemplateManager) LoadTemplates() error {
 
 	// Process each template to load additional configuration files
 	for templateKey, tpl := range tm.templateFile.Templates {
-		baseDir := filepath.Join(tm.templatesDir, tpl.Path)
+		baseDir := filepath.Join(tm.config.TemplatesCacheDir, templatesVersion, tpl.Path)
 
 		// Load project.toml if it exists
 		projectPath := filepath.Join(baseDir, "project.toml")
@@ -128,7 +187,14 @@ func (tm *TemplateManager) LoadTemplates() error {
 	}
 
 	tm.loaded = true
+	tm.currentVersion = templatesVersion
 	log.Printf("Successfully loaded %d templates\n", len(tm.templateFile.Templates))
+
+	tm.cache[templatesVersion] = TemplatesSnapshot{
+		Templates: tm.templateFile.Templates,
+		Count:     len(tm.templateFile.Templates),
+		Version:   templatesVersion,
+	}
 	return nil
 }
 
@@ -186,18 +252,12 @@ func (tm *TemplateManager) GetTemplate(name string) (*RootTemplate, error) {
 	return &tpl, nil
 }
 
-// ListAll returns all available templates
-func (tm *TemplateManager) ListAll() ([]RootTemplate, error) {
-	if !tm.loaded {
-		return nil, errors.NewError("list templates", errors.ErrLoadTemplates)
+// GetVersionCount returns the number of templates for a given version from the cache
+func (tm *TemplateManager) GetVersionCount(version string) int {
+	if snapshot, ok := tm.cache[version]; ok {
+		return snapshot.Count
 	}
-
-	templates := make([]RootTemplate, 0, len(tm.templateFile.Templates))
-	for _, tpl := range tm.templateFile.Templates {
-		templates = append(templates, tpl)
-	}
-
-	return templates, nil
+	return 0
 }
 
 // GetTemplatesMap returns the templates map
@@ -207,7 +267,7 @@ func (tm *TemplateManager) GetTemplatesMap() map[string]RootTemplate {
 
 // GetTemplatesDir returns the templates directory path
 func (tm *TemplateManager) GetTemplatesDir() string {
-	return tm.templatesDir
+	return tm.config.TemplatesCacheDir
 }
 
 // IsLoaded returns whether templates have been loaded

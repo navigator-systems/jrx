@@ -7,7 +7,7 @@ import (
 	"github.com/navigator-systems/jrx/internal/templates"
 )
 
-func TmplInfoCmd() {
+func TmplInfoCmd(version string) {
 	// Load JRX configuration
 	jrxConfig, err := config.ReadJRXConfig()
 	if err != nil {
@@ -17,9 +17,13 @@ func TmplInfoCmd() {
 
 	// Create template manager
 	tm := templates.NewTemplateManager(jrxConfig)
+	if version == "" {
+		version = jrxConfig.TemplatesDefault
+	}
 
+	fmt.Println("Template version is: ", version)
 	// Load templates
-	if err := tm.LoadTemplates(); err != nil {
+	if err := tm.LoadTemplates(version); err != nil {
 		fmt.Printf("Error loading templates: %v\n", err)
 		return
 	}

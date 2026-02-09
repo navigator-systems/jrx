@@ -31,7 +31,7 @@ func parseVars(varsString string) map[string]string {
 	return vars
 }
 
-func NewCmd(projectName, templateName, varsString, githubOrg string) {
+func NewCmd(projectName, templateName, varsString, githubOrg, version string) {
 	// Validate input
 	if projectName == "" {
 		fmt.Println("Error:", errors.ErrEmptyProjectName)
@@ -52,8 +52,12 @@ func NewCmd(projectName, templateName, varsString, githubOrg string) {
 	// Create template manager
 	tm := templates.NewTemplateManager(jrxConfig)
 
+	if version == "" {
+		version = jrxConfig.TemplatesDefault
+	}
+
 	// Load templates
-	if err := tm.LoadTemplates(); err != nil {
+	if err := tm.LoadTemplates(version); err != nil {
 		fmt.Printf("Error loading templates: %v\n", err)
 		return
 	}
@@ -84,7 +88,8 @@ func NewCmd(projectName, templateName, varsString, githubOrg string) {
 	}
 
 	// Create project generator
-	pg := generator.NewProjectGenerator(tmpl, projectName, tm.GetTemplatesDir(), tm.GetFuncMap(), jrxConfig)
+	pg := generator.NewProjectGenerator(
+		tmpl, projectName, tm.GetTemplatesDir(), version, tm.GetFuncMap(), jrxConfig)
 
 	// Generate the project
 	if err := pg.Generate(); err != nil {
