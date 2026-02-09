@@ -16,6 +16,12 @@ import (
 	"github.com/navigator-systems/jrx/internal/errors"
 )
 
+type TemplatesSnapshot struct {
+	Templates map[string]RootTemplate
+	Count     int
+	Version   string
+}
+
 // TemplateManager manages template operations
 type TemplateManager struct {
 	config         config.JRXConfig
@@ -23,6 +29,7 @@ type TemplateManager struct {
 	funcMap        template.FuncMap
 	loaded         bool
 	currentVersion string
+	cache          map[string]TemplatesSnapshot
 }
 
 // NewTemplateManager creates a new TemplateManager instance
@@ -31,6 +38,7 @@ func NewTemplateManager(cfg config.JRXConfig) *TemplateManager {
 		config:  cfg,
 		funcMap: buildFuncMap(),
 		loaded:  false,
+		cache:   make(map[string]TemplatesSnapshot),
 	}
 }
 
@@ -136,6 +144,14 @@ func (tm *TemplateManager) LoadTemplates(templatesVersion string) error {
 		return errors.NewError("Load templates", fmt.Errorf("Version %s is not available", templatesVersion))
 	}
 
+	if snapshot, ok := tm.cache[templatesVersion]; ok {
+		tm.templateFile.Templates = snapshot.Templates
+		tm.loaded = true
+		tm.currentVersion = templatesVersion
+		log.Printf("Loaded templates from cache for version '%s'\n", templatesVersion)
+		return nil
+	}
+
 	templatePath := filepath.Join(tm.config.TemplatesCacheDir, templatesVersion, "templates.toml")
 	if _, err := os.Stat(templatePath); err != nil {
 		return errors.NewError("find templates.toml", errors.ErrConfigNotFound)
@@ -171,7 +187,14 @@ func (tm *TemplateManager) LoadTemplates(templatesVersion string) error {
 	}
 
 	tm.loaded = true
+	tm.currentVersion = templatesVersion
 	log.Printf("Successfully loaded %d templates\n", len(tm.templateFile.Templates))
+
+	tm.cache[templatesVersion] = TemplatesSnapshot{
+		Templates: tm.templateFile.Templates,
+		Count:     len(tm.templateFile.Templates),
+		Version:   templatesVersion,
+	}
 	return nil
 }
 
@@ -227,6 +250,14 @@ func (tm *TemplateManager) GetTemplate(name string) (*RootTemplate, error) {
 	}
 
 	return &tpl, nil
+}
+
+// GetVersionCount returns the number of templates for a given version from the cache
+func (tm *TemplateManager) GetVersionCount(version string) int {
+	if snapshot, ok := tm.cache[version]; ok {
+		return snapshot.Count
+	}
+	return 0
 }
 
 // GetTemplatesMap returns the templates map

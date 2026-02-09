@@ -103,20 +103,59 @@ func (s *Server) handleNewProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	selectedVersion := strings.TrimSpace(r.URL.Query().Get("templateVersion"))
+	if selectedVersion == "" {
+		selectedVersion = s.config.TemplatesDefault
+	}
+
 	data := struct {
 		Title         string
 		Templates     map[string]templates.RootTemplate
 		Organizations []string
+		Versions      []string
+		Current       string
+		VersionCounts map[string]int
 		Error         string
 	}{
 		Title:         "Create New Project",
 		Organizations: s.config.GitProvider.GithubOrganization,
+		Versions:      s.templateManager.GetAvailableVersions(),
+		Current:       selectedVersion,
+		VersionCounts: map[string]int{},
 	}
 
-	if s.templateManager.IsLoaded() {
-		tmplList := s.templateManager.GetTemplatesMap()
+	if !s.templateManager.ValidateVersion(selectedVersion) {
+		data.Error = fmt.Sprintf("Template version '%s' is not available", selectedVersion)
+		selectedVersion = s.config.TemplatesDefault
+		data.Current = selectedVersion
+	}
 
-		data.Templates = tmplList
+	data.VersionCounts = map[string]int{}
+	for _, version := range data.Versions {
+		data.VersionCounts[version] = s.templateManager.GetVersionCount(version)
+	}
+	/*
+		if len(data.Versions) > 0 {
+			for _, version := range data.Versions {
+				if err := s.templateManager.LoadTemplates(version); err != nil {
+					data.VersionCounts[version] = 0
+					continue
+				}
+
+				tmplList, err := s.templateManager.ListAll()
+				if err != nil {
+					data.VersionCounts[version] = 0
+					continue
+				}
+				data.VersionCounts[version] = len(tmplList)
+			}
+		}
+	*/
+
+	if err := s.templateManager.LoadTemplates(selectedVersion); err != nil {
+		data.Error = err.Error()
+	} else {
+		data.Templates = s.templateManager.GetTemplatesMap()
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
@@ -128,6 +167,7 @@ func (s *Server) handleNewProject(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleCreateProject(w http.ResponseWriter, r *http.Request) {
 	projectName := strings.TrimSpace(r.FormValue("projectName"))
 	templateName := strings.TrimSpace(r.FormValue("templateName"))
+	templateVersion := strings.TrimSpace(r.FormValue("templateVersion"))
 	githubOrg := strings.TrimSpace(r.FormValue("githubOrg"))
 
 	// Parse variables from form fields (var_keyname)
@@ -142,23 +182,25 @@ func (s *Server) handleCreateProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Title         string
-		ProjectName   string
-		TemplateName  string
-		Variables     map[string]string
-		Success       bool
-		Message       string
-		OutputDir     string
-		GithubOrg     string
-		GithubRepoURL string
+		Title           string
+		ProjectName     string
+		TemplateName    string
+		TemplateVersion string
+		Variables       map[string]string
+		Success         bool
+		Message         string
+		OutputDir       string
+		GithubOrg       string
+		GithubRepoURL   string
 	}{
-		Title:        "Project Creation Result",
-		ProjectName:  projectName,
-		TemplateName: templateName,
-		Variables:    vars,
-		GithubOrg:    githubOrg,
-		Success:      true,
-		Message:      "Project created successfully!",
+		Title:           "Project Creation Result",
+		ProjectName:     projectName,
+		TemplateName:    templateName,
+		TemplateVersion: templateVersion,
+		Variables:       vars,
+		GithubOrg:       githubOrg,
+		Success:         true,
+		Message:         "Project created successfully!",
 	}
 
 	// Validation
@@ -170,7 +212,7 @@ func (s *Server) handleCreateProject(w http.ResponseWriter, r *http.Request) {
 		data.Message = "Error: Template name is required"
 	} else {
 		// Create the project
-		if err := s.createProject(projectName, templateName, vars, githubOrg, &data, w, r); err != nil {
+		if err := s.createProject(projectName, templateName, templateVersion, vars, githubOrg, &data, w, r); err != nil {
 			data.Success = false
 			data.Message = fmt.Sprintf("Error: %v", err)
 		} else if githubOrg == "" {
@@ -217,23 +259,34 @@ func (s *Server) handleGithubOrgs(w http.ResponseWriter, r *http.Request) {
 }
 
 // createProject creates a project from template with optional GitHub push
-func (s *Server) createProject(projectName, templateName string, vars map[string]string, githubOrg string, data *struct {
-	Title         string
-	ProjectName   string
-	TemplateName  string
-	Variables     map[string]string
-	Success       bool
-	Message       string
-	OutputDir     string
-	GithubOrg     string
-	GithubRepoURL string
+func (s *Server) createProject(projectName, templateName, templateVersion string, vars map[string]string, githubOrg string, data *struct {
+	Title           string
+	ProjectName     string
+	TemplateName    string
+	TemplateVersion string
+	Variables       map[string]string
+	Success         bool
+	Message         string
+	OutputDir       string
+	GithubOrg       string
+	GithubRepoURL   string
 }, w http.ResponseWriter, r *http.Request) error {
 	// Log for debugging
-	log.Printf("Creating project: name=%s, template=%s, org=%s\n", projectName, templateName, githubOrg)
+	log.Printf("Creating project: name=%s, template=%s, version=%s, org=%s\n", projectName, templateName, templateVersion, githubOrg)
 
 	// Verify templates are loaded
 	if !s.templateManager.IsLoaded() {
 		return fmt.Errorf("templates are not loaded, please wait for server initialization")
+	}
+
+	if templateVersion == "" {
+		templateVersion = s.config.TemplatesDefault
+	}
+	if !s.templateManager.ValidateVersion(templateVersion) {
+		return fmt.Errorf("template version '%s' is not available", templateVersion)
+	}
+	if err := s.templateManager.LoadTemplates(templateVersion); err != nil {
+		return fmt.Errorf("failed to load templates for version '%s': %w", templateVersion, err)
 	}
 
 	// Get the specific template
@@ -257,7 +310,7 @@ func (s *Server) createProject(projectName, templateName string, vars map[string
 			}
 		}
 	}
-	version := "main"
+	version := templateVersion
 	// Create project generator
 	pg := generator.NewProjectGenerator(tmpl, projectName, s.templateManager.GetTemplatesDir(), version, s.templateManager.GetFuncMap(), s.config)
 

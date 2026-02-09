@@ -111,9 +111,18 @@
             {{end}}
             
             <form method="POST" action="/project">
+                <label for="templateVersion">Template Version</label>
+                <select id="templateVersion" name="templateVersion" onchange="onVersionChange()" required>
+                    <option value="">-- Select a version --</option>
+                    {{range .Versions}}
+                    {{ $count := index $.VersionCounts . }}
+                    <option value="{{.}}" {{if eq $.Current .}}selected{{end}}>{{.}} ({{$count}} templates)</option>
+                    {{end}}
+                </select>
+
                 <label for="templateName">Template</label>
                 <select id="templateName" name="templateName" onchange="updateVariables()" required>
-                    <option value="">-- Select a template --</option>
+                    <option value="">-- Select a template ({{len .Templates}} available) --</option>
                     {{range $key, $template := .Templates}}
                     <option value="{{$key}}">{{$template.Name}} - {{$template.Description}}</option>
                     {{end}}
@@ -180,6 +189,34 @@
                 if (varSection) {
                     varSection.style.display = 'block';
                 }
+            }
+        }
+
+        async function onVersionChange() {
+            const version = document.getElementById('templateVersion').value;
+            if (!version) return;
+            
+            try {
+                const res = await fetch(`/templates/by-version?version=${encodeURIComponent(version)}`);
+                if (!res.ok) {
+                    console.error('Failed to fetch templates for version:', version);
+                    return;
+                }
+                const data = await res.json();
+
+                const select = document.getElementById('templateName');
+                select.innerHTML = `<option value="">-- Select a template (${data.count} available) --</option>`;
+                Object.entries(data.templates).forEach(([key, tpl]) => {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = `${tpl.name} - ${tpl.description}`;
+                    select.appendChild(opt);
+                });
+
+                // Limpiar y ocultar variables anteriores
+                document.querySelectorAll('.template-vars').forEach(el => el.style.display = 'none');
+            } catch (err) {
+                console.error('Error loading templates:', err);
             }
         }
         
