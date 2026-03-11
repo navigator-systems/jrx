@@ -18,6 +18,12 @@ func ServerCmd(port string) {
 
 	// Create and start server
 	srv := server.NewServer(jrxConfig)
+	defer func() {
+		if err := srv.Close(); err != nil {
+			log.Printf("Warning: failed to close server resources: %v", err)
+		}
+	}()
+
 	log.Printf("Starting JRX server on port %s...\n", jrxConfig.ServerPort)
 
 	if err := srv.Start(); err != nil {

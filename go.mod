@@ -6,6 +6,8 @@ require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/go-github/v58 v58.0.0
+	github.com/lib/pq v1.10.9
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/oauth2 v0.34.0
 )
