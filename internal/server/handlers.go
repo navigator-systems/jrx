@@ -329,7 +329,6 @@ func (s *Server) createProject(projectName, templateName, templateVersion string
 			ProjectName:     projectName,
 			TemplateName:    templateName,
 			TemplateVersion: templateVersion,
-			CreatedBy:       "web-user",
 			Tags:            tmpl.Tags,
 			Metadata: map[string]interface{}{
 				"output_dir": pg.GetOutputDir(),

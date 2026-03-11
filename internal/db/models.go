@@ -13,8 +13,6 @@ type Project struct {
 	RepositoryURL   string                 `json:"repository_url,omitempty"`
 	CreatedAt       time.Time              `json:"created_at"`
 	UpdatedAt       time.Time              `json:"updated_at"`
-	CreatedBy       string                 `json:"created_by,omitempty"`
-	Team            string                 `json:"team,omitempty"`
 	Status          string                 `json:"status"` // active, archived, deprecated
 	Tags            []string               `json:"tags,omitempty"`
 	Metadata        map[string]interface{} `json:"metadata,omitempty"`
@@ -45,7 +43,6 @@ type ProjectFilter struct {
 	Status       string
 	TemplateName string
 	Team         string
-	CreatedBy    string
 	Limit        int
 	Offset       int
 }

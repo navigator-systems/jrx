@@ -80,8 +80,6 @@ func (r *sqlProjectRepository) Create(ctx context.Context, project *Project) err
 		project.RepositoryURL,
 		project.CreatedAt,
 		project.UpdatedAt,
-		project.CreatedBy,
-		project.Team,
 		project.Status,
 		string(tagsJSON),
 		string(metadataJSON),
@@ -142,11 +140,6 @@ func (r *sqlProjectRepository) List(ctx context.Context, filter *ProjectFilter) 
 		if filter.Team != "" {
 			where = append(where, fmt.Sprintf("team = %s", r.p(argPos)))
 			args = append(args, filter.Team)
-			argPos++
-		}
-		if filter.CreatedBy != "" {
-			where = append(where, fmt.Sprintf("created_by = %s", r.p(argPos)))
-			args = append(args, filter.CreatedBy)
 			argPos++
 		}
 	}
@@ -232,8 +225,7 @@ func (r *sqlProjectRepository) Update(ctx context.Context, project *Project) err
 		project.TemplateVersion,
 		project.RepositoryURL,
 		project.UpdatedAt,
-		project.CreatedBy,
-		project.Team,
+
 		project.Status,
 		string(tagsJSON),
 		string(metadataJSON),
@@ -458,8 +450,6 @@ func scanProjectRow(scanner projectRowScanner) (*Project, error) {
 		&project.RepositoryURL,
 		&project.CreatedAt,
 		&project.UpdatedAt,
-		&project.CreatedBy,
-		&project.Team,
 		&project.Status,
 		&tagsRaw,
 		&metadataRaw,

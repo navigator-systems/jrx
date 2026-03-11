@@ -15,10 +15,10 @@ type TrackingInput struct {
 	TemplateName    string
 	TemplateVersion string
 	RepositoryURL   string
-	CreatedBy       string
-	Team            string
-	Tags            []string
-	Metadata        map[string]interface{}
+
+	Team     string
+	Tags     []string
+	Metadata map[string]interface{}
 }
 
 // TrackProjectCreation persists the project and a matching history event.
@@ -51,11 +51,10 @@ func TrackProjectCreation(ctx context.Context, database Database, input Tracking
 		RepositoryURL:   input.RepositoryURL,
 		CreatedAt:       now,
 		UpdatedAt:       now,
-		CreatedBy:       input.CreatedBy,
-		Team:            input.Team,
-		Status:          "active",
-		Tags:            input.Tags,
-		Metadata:        input.Metadata,
+
+		Status:   "active",
+		Tags:     input.Tags,
+		Metadata: input.Metadata,
 	}
 
 	if err := repo.Create(ctx, project); err != nil {
@@ -67,7 +66,6 @@ func TrackProjectCreation(ctx context.Context, database Database, input Tracking
 		ProjectID: project.ID,
 		Action:    "created",
 		Timestamp: now,
-		User:      input.CreatedBy,
 		Details: map[string]interface{}{
 			"template_name":    input.TemplateName,
 			"template_version": input.TemplateVersion,

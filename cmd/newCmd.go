@@ -118,7 +118,6 @@ func NewCmd(projectName, templateName, varsString, githubOrg, version string) {
 			ProjectName:     projectName,
 			TemplateName:    templateName,
 			TemplateVersion: version,
-			CreatedBy:       os.Getenv("USER"),
 			Tags:            tmpl.Tags,
 			Metadata: map[string]interface{}{
 				"output_dir": pg.GetOutputDir(),
