@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/navigator-systems/jrx/internal/config"
+	"github.com/navigator-systems/jrx/internal/db"
 	"github.com/navigator-systems/jrx/internal/errors"
 	"github.com/navigator-systems/jrx/internal/generator"
 	"github.com/navigator-systems/jrx/internal/templates"
@@ -91,10 +93,43 @@ func NewCmd(projectName, templateName, varsString, githubOrg, version string) {
 	pg := generator.NewProjectGenerator(
 		tmpl, projectName, tm.GetTemplatesDir(), version, tm.GetFuncMap(), jrxConfig)
 
+	// Initialize the configured database (SQLite for local, PostgreSQL for production).
+	// If DB initialization fails we continue project generation and only skip tracking.
+	ctx := context.Background()
+	projectDB, err := db.InitDatabase(ctx, jrxConfig)
+	if err != nil {
+		log.Printf("Warning: project tracking database is unavailable: %v", err)
+	} else if projectDB != nil {
+		defer func() {
+			if closeErr := projectDB.Close(); closeErr != nil {
+				log.Printf("Warning: failed to close project tracking database: %v", closeErr)
+			}
+		}()
+	}
+
 	// Generate the project
 	if err := pg.Generate(); err != nil {
 		fmt.Printf("Error generating project: %v\n", err)
 		return
+	}
+
+	if projectDB != nil {
+		trackingInput := db.TrackingInput{
+			ProjectName:     projectName,
+			TemplateName:    templateName,
+			TemplateVersion: version,
+			CreatedBy:       os.Getenv("USER"),
+			Tags:            tmpl.Tags,
+			Metadata: map[string]interface{}{
+				"output_dir": pg.GetOutputDir(),
+				"flow":       "cli",
+				"vars":       userVars,
+			},
+		}
+
+		if err := db.TrackProjectCreation(ctx, projectDB, trackingInput); err != nil {
+			log.Printf("Warning: failed to track project creation: %v", err)
+		}
 	}
 
 	fmt.Printf("Project '%s' created successfully from template '%s'\n", projectName, templateName)
@@ -102,7 +137,6 @@ func NewCmd(projectName, templateName, varsString, githubOrg, version string) {
 
 	if githubOrg != "" {
 		// Create GitHub repository
-		ctx := context.Background()
 		if err := pg.CreateAndPushToGitHub(ctx, githubOrg); err != nil {
 			fmt.Printf("Warning: Failed to create/push GitHub repository: %v\n", err)
 			fmt.Printf("Project was created locally. You can push manually:\n")
@@ -110,6 +144,13 @@ func NewCmd(projectName, templateName, varsString, githubOrg, version string) {
 			fmt.Printf("  git remote add origin <repo-url>\n")
 			fmt.Printf("  git push -u origin main\n")
 			return
+		}
+
+		if projectDB != nil {
+			repositoryURL := fmt.Sprintf("%s/%s/%s", jrxConfig.GitProvider.GithubURL, githubOrg, projectName)
+			if err := db.UpdateProjectRepositoryURL(ctx, projectDB, projectName, repositoryURL, os.Getenv("USER")); err != nil {
+				log.Printf("Warning: failed to update tracked repository URL: %v", err)
+			}
 		}
 	}
 }

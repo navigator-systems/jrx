@@ -44,4 +44,5 @@ var (
 	ErrCannotCloneBranch     = errors.New("cannot clone specified branch")
 	ErrLoadTemplates         = errors.New("failed to load templates")
 	ErrCannotCreateDirectory = errors.New("cannot create directory")
+	ErrInvalidDatabaseConfig = errors.New("invalid database configuration")
 )

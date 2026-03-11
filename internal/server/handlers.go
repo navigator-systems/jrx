@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/navigator-systems/jrx/internal/db"
 	"github.com/navigator-systems/jrx/internal/generator"
 	"github.com/navigator-systems/jrx/internal/templates"
 )
@@ -322,6 +323,26 @@ func (s *Server) createProject(projectName, templateName, templateVersion string
 	data.OutputDir = pg.GetOutputDir()
 	data.Message = fmt.Sprintf("Project '%s' created successfully at: %s", projectName, pg.GetOutputDir())
 
+	// Persist project tracking data right after generation so both ZIP and GitHub flows are covered.
+	if s.database != nil {
+		trackingInput := db.TrackingInput{
+			ProjectName:     projectName,
+			TemplateName:    templateName,
+			TemplateVersion: templateVersion,
+			CreatedBy:       "web-user",
+			Tags:            tmpl.Tags,
+			Metadata: map[string]interface{}{
+				"output_dir": pg.GetOutputDir(),
+				"flow":       "web",
+				"vars":       vars,
+			},
+		}
+
+		if err := db.TrackProjectCreation(context.Background(), s.database, trackingInput); err != nil {
+			log.Printf("Warning: failed to track project creation in DB: %v", err)
+		}
+	}
+
 	// If no GitHub organization, create ZIP and serve as download
 	if githubOrg == "" {
 		zipPath := pg.GetOutputDir() + ".zip"
@@ -359,6 +380,12 @@ func (s *Server) createProject(projectName, templateName, templateVersion string
 			// Get the GitHub URL (we need to construct it from the org and project name)
 			githubURL := fmt.Sprintf("%s/%s/%s", s.config.GitProvider.GithubURL, githubOrg, projectName)
 			data.GithubRepoURL = githubURL
+
+			if s.database != nil {
+				if err := db.UpdateProjectRepositoryURL(context.Background(), s.database, projectName, githubURL, "web-user"); err != nil {
+					log.Printf("Warning: failed to update tracked repository URL: %v", err)
+				}
+			}
 
 			// Clean up local files since project is now on GitHub
 			if err := pg.CleanupLocalFiles(); err != nil {

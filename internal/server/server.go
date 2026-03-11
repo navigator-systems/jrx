@@ -1,10 +1,12 @@
 package server
 
 import (
+	"context"
 	"log"
 	"net/http"
 
 	"github.com/navigator-systems/jrx/internal/config"
+	"github.com/navigator-systems/jrx/internal/db"
 	"github.com/navigator-systems/jrx/internal/templates"
 )
 
@@ -12,18 +14,34 @@ import (
 type Server struct {
 	config          config.JRXConfig
 	templateManager *templates.TemplateManager
+	database        db.Database
 	port            string
 	currentVersion  string
 }
 
 // NewServer creates a new server instance
 func NewServer(cfg config.JRXConfig) *Server {
+	ctx := context.Background()
+	database, err := db.InitDatabase(ctx, cfg)
+	if err != nil {
+		log.Printf("Warning: project tracking database unavailable: %v", err)
+	}
+
 	return &Server{
 		config:          cfg,
 		templateManager: templates.NewTemplateManager(cfg),
+		database:        database,
 		port:            cfg.ServerPort,
 		currentVersion:  cfg.TemplatesDefault,
 	}
+}
+
+// Close releases resources owned by the server, including optional database connections.
+func (s *Server) Close() error {
+	if s.database != nil {
+		return s.database.Close()
+	}
+	return nil
 }
 
 // Start initializes and starts the web server
