@@ -27,7 +27,7 @@ func NewDatabase(cfg config.JRXConfig) (Database, error) {
 	dbType := strings.ToLower(strings.TrimSpace(cfg.Database.Database))
 
 	switch dbType {
-	case "sqlite", "":
+	case "sqlite":
 		dbPath := strings.TrimSpace(cfg.Database.DBPath)
 		// Use a deterministic default path when no explicit SQLite file is configured.
 		if dbPath == "" {
@@ -36,13 +36,15 @@ func NewDatabase(cfg config.JRXConfig) (Database, error) {
 		return NewSQLiteDB(dbPath)
 
 	case "postgres", "postgresql":
-		sslMode := "disable"
-		if strings.TrimSpace(cfg.Database.DBHost) != "" {
+		host := strings.TrimSpace(cfg.Database.DBHost)
+		sslMode := ""
+
+		if host != "" && host != "localhost" && host != "127.0.0.1" && host != "::1" {
 			sslMode = "require"
 		}
 
 		pgConfig := PostgresConfig{
-			Host:     strings.TrimSpace(cfg.Database.DBHost),
+			Host:     host,
 			Port:     cfg.Database.DBPort,
 			User:     strings.TrimSpace(cfg.Database.DBUser),
 			Password: cfg.Database.DBPassword,

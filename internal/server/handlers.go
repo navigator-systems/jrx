@@ -337,7 +337,7 @@ func (s *Server) createProject(projectName, templateName, templateVersion string
 			},
 		}
 
-		if err := db.TrackProjectCreation(context.Background(), s.database, trackingInput); err != nil {
+		if err := db.TrackProjectCreation(r.Context(), s.database, trackingInput); err != nil {
 			log.Printf("Warning: failed to track project creation in DB: %v", err)
 		}
 	}
@@ -381,7 +381,7 @@ func (s *Server) createProject(projectName, templateName, templateVersion string
 			data.GithubRepoURL = githubURL
 
 			if s.database != nil {
-				if err := db.UpdateProjectRepositoryURL(context.Background(), s.database, projectName, githubURL, "web-user"); err != nil {
+				if err := db.UpdateProjectRepositoryURL(r.Context(), s.database, projectName, githubURL, "web-user"); err != nil {
 					log.Printf("Warning: failed to update tracked repository URL: %v", err)
 				}
 			}
